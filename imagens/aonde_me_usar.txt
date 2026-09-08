@@ -1,0 +1,58 @@
+SETIVA - Pacote de logo e ícones
+
+Arquivo criado para facilitar o uso da marca no site e no app.
+
+PASTAS E ONDE USAR
+
+1) masters/
+Arquivos mestres em PNG com melhor resolução para editar, reenviar ou gerar novos tamanhos.
+
+2) web/light/
+Use em site, landing page, dashboard e materiais com fundo claro.
+Arquivos: setiva_logo_web_light_*.png
+
+3) web/dark/
+Use em site, dashboard, header, sidebar e telas com fundo escuro.
+Arquivos: setiva_logo_web_dark_*.png
+
+4) web/mono_black/
+Use em impressão simples, documentos, PDF, marca d'água escura e usos monocromáticos em fundo claro.
+Arquivos: setiva_logo_mono_black_*.png
+
+5) web/mono_white/
+Use em fundos escuros quando precisar de uma versão simples de uma cor.
+Arquivos: setiva_logo_mono_white_*.png
+
+6) symbol/
+Ícone isolado da marca. Ideal para favicon, avatar, menu compactado, botão, loading, redes sociais e miniaturas.
+Arquivos: setiva_symbol_*.png
+
+7) favicon/
+Use no site.
+- favicon.ico: opção clássica para HTML
+- favicon-32x32.png e favicon-16x16.png: versões comuns para navegador
+- tamanhos maiores podem ser úteis para PWA e atalhos
+
+8) app/dark/
+Ícone do aplicativo com fundo escuro. Melhor para proposta premium e telas onde o app precisa parecer mais forte.
+Arquivos: setiva_app_icon_dark_*.png
+
+9) app/light/
+Ícone do aplicativo com fundo claro. Melhor para ambientes leves, branding clean e apresentações.
+Arquivos: setiva_app_icon_light_*.png
+
+SUGESTÃO RÁPIDA DE USO
+
+SITE
+- Header / navbar em fundo claro: web/light/setiva_logo_web_light_1024w.png
+- Header / navbar em fundo escuro: web/dark/setiva_logo_web_dark_1024w.png
+- Favicon: favicon/favicon.ico
+- Ícone sozinho em menus: symbol/setiva_symbol_128x128.png ou 64x64
+
+APP
+- Loja / apresentação: app/dark/setiva_app_icon_dark_1024x1024.png ou app/light/setiva_app_icon_light_1024x1024.png
+- iOS: 180x180, 167x167, 152x152, 120x120
+- Android / PWA: 512x512, 192x192, 144x144, 96x96, 72x72, 48x48
+
+OBSERVAÇÃO
+Todos os arquivos estão em PNG. As versões transparentes funcionam melhor para sobrepor em layouts.

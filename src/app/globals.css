@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+/*
+  Setiva: design tokens.
+  Conceito: caderno financeiro contemporâneo. Papel quente, tinta escura,
+  oliva como marca, argila e névoa para distinguir contexto, lima só para
+  ação. Cores semânticas (positivo/negativo/alerta/info) são independentes
+  da marca — nunca reaproveitar lima/oliva como "sucesso" ou clay como "erro".
+*/
+
+:root {
+  /* Paleta de marca */
+  --paper: #f4f1e8;
+  --paper-raised: #fbf9f2;
+  --ink: #202a25;
+  --ink-soft: #4d554e;
+  --olive: #46533a;
+  --olive-strong: #333d29;
+  --lime: #dceb9b;
+  --lime-strong: #c7db76;
+  --clay: #b9674f;
+  --clay-soft: #e3c4b8;
+  --mist: #ccdce3;
+  --mist-soft: #e5eef1;
+
+  /* Papéis semânticos, independentes da marca */
+  --positive: #2e6b46;
+  --positive-soft: #dbe9df;
+  --negative: #a83e2c;
+  --negative-soft: #f1dcd6;
+  --warning: #93650f;
+  --warning-soft: #f1e3c4;
+  --info: #2f6c86;
+  --info-soft: #dbe9ee;
+
+  --background: var(--paper);
+  --surface: var(--paper-raised);
+  --foreground: var(--ink);
+  --foreground-muted: var(--ink-soft);
+  --border: #dcd6c4;
+  --border-strong: #c7bfa6;
+  --ring: var(--olive);
+
+  --brand: var(--olive);
+  --brand-strong: var(--olive-strong);
+  --brand-foreground: var(--paper);
+  --accent: var(--lime);
+  --accent-strong: var(--lime-strong);
+  --accent-foreground: var(--ink);
+  --context-warm: var(--clay);
+  --context-warm-soft: var(--clay-soft);
+  --context-cool: var(--mist);
+  --context-cool-soft: var(--mist-soft);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+
+  --shadow-color: 32 20% 25%;
+  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.06);
+  --shadow-md: 0 4px 12px hsl(var(--shadow-color) / 0.08);
+  --shadow-lg: 0 12px 32px hsl(var(--shadow-color) / 0.12);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 250ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-theme="dark"],
+:root:not([data-theme="light"]) {
+  @media (prefers-color-scheme: dark) {
+    --paper: #131a16;
+    --paper-raised: #1a231d;
+    --ink: #f1efe4;
+    --ink-soft: #c7c9bd;
+    --olive: #a8c48f;
+    --olive-strong: #c4dba9;
+    --lime: #dceb9b;
+    --lime-strong: #eaf4c2;
+    --clay: #e2917a;
+    --clay-soft: #4a2e26;
+    --mist: #a9c3cd;
+    --mist-soft: #253338;
+
+    --positive: #7fbf98;
+    --positive-soft: #1c3327;
+    --negative: #e2917a;
+    --negative-soft: #3a241e;
+    --warning: #e0b866;
+    --warning-soft: #3a2f16;
+    --info: #8fc3d7;
+    --info-soft: #1d323a;
+
+    --background: var(--paper);
+    --surface: var(--paper-raised);
+    --foreground: var(--ink);
+    --foreground-muted: var(--ink-soft);
+    --border: #2c352e;
+    --border-strong: #3d473e;
+    --ring: var(--olive);
+
+    --brand: var(--olive);
+    --brand-strong: var(--olive-strong);
+    --brand-foreground: #14201b;
+    --accent: var(--lime);
+    --accent-strong: var(--lime-strong);
+    --accent-foreground: #182013;
+    --context-warm: var(--clay);
+    --context-warm-soft: var(--clay-soft);
+    --context-cool: var(--mist);
+    --context-cool-soft: var(--mist-soft);
+
+    --shadow-color: 150 30% 4%;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #131a16;
+  --paper-raised: #1a231d;
+  --ink: #f1efe4;
+  --ink-soft: #c7c9bd;
+  --olive: #a8c48f;
+  --olive-strong: #c4dba9;
+  --clay: #e2917a;
+  --clay-soft: #4a2e26;
+  --mist: #a9c3cd;
+  --mist-soft: #253338;
+
+  --positive: #7fbf98;
+  --positive-soft: #1c3327;
+  --negative: #e2917a;
+  --negative-soft: #3a241e;
+  --warning: #e0b866;
+  --warning-soft: #3a2f16;
+  --info: #8fc3d7;
+  --info-soft: #1d323a;
+
+  --background: var(--paper);
+  --surface: var(--paper-raised);
+  --foreground: var(--ink);
+  --foreground-muted: var(--ink-soft);
+  --border: #2c352e;
+  --border-strong: #3d473e;
+  --ring: var(--olive);
+
+  --brand: var(--olive);
+  --brand-strong: var(--olive-strong);
+  --brand-foreground: #14201b;
+  --accent: var(--lime);
+  --accent-strong: var(--lime-strong);
+  --accent-foreground: #182013;
+  --context-warm: var(--clay);
+  --context-warm-soft: var(--clay-soft);
+  --context-cool: var(--mist);
+  --context-cool-soft: var(--mist-soft);
+
+  --shadow-color: 150 30% 4%;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-context-warm: var(--context-warm);
+  --color-context-warm-soft: var(--context-warm-soft);
+  --color-context-cool: var(--context-cool);
+  --color-context-cool-soft: var(--context-cool-soft);
+
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-negative: var(--negative);
+  --color-negative-soft: var(--negative-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "tnum" 1, "cv05" 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  .tabular-figures {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
