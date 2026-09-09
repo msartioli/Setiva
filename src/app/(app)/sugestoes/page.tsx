@@ -17,10 +17,11 @@ export default async function SugestoesPage() {
   const today = todayISO();
   const periodEnd = endOfMonthISO(today);
 
-  const [{ data: balances }, { data: commitments }, { data: goalsReserve }] = await Promise.all([
+  const [{ data: balances }, { data: commitments }, { data: goalsReserve }, { data: profile }] = await Promise.all([
     supabase.from("account_realized_balances").select("balance_cents"),
     supabase.from("upcoming_commitments").select("due_date, amount_cents, kind, is_estimate"),
     supabase.from("goals").select("reserved_cents, linked_account_id").not("linked_account_id", "is", null),
+    supabase.from("profiles").select("mascot_enabled").eq("user_id", user.id).single(),
   ]);
 
   const realizedTotalCents = sum((balances ?? []).map((b) => b.balance_cents ?? 0));
@@ -46,7 +47,11 @@ export default async function SugestoesPage() {
         <p className="text-sm font-medium text-brand">Calculado localmente</p>
         <h1 className="font-display text-2xl text-foreground sm:text-3xl">Sugestões</h1>
       </div>
-      <SuggestionsView suggestions={suggestions} marginConfirmedCents={margin.confirmedCents} />
+      <SuggestionsView
+        suggestions={suggestions}
+        marginConfirmedCents={margin.confirmedCents}
+        mascotEnabled={profile?.mascot_enabled ?? true}
+      />
     </div>
   );
 }

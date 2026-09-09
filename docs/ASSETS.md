@@ -43,7 +43,16 @@ Dois tons de pele diferentes entre os personagens, de propósito, para não repr
 
 ## Mascote (Tiva)
 
-**Parcial.** `src/components/mascot/tiva.tsx` tem os estados "boas-vindas" (`TivaWelcome`, último passo do onboarding, condicionado a `mascotEnabled`) e "pausa" (`TivaPause`, deitada e tranquila). Ambos SVG originais em formas simples, nunca baseados em personagem existente. Os estados "dica" e "comemoração" mencionados no PROMPT MESTRE ainda não existem.
+**Completa.** `src/components/mascot/tiva.tsx` tem os quatro estados pedidos pelo PROMPT MESTRE, todos SVG originais em formas simples, nunca baseados em personagem existente:
+
+| Componente | Estado | Onde aparece |
+|---|---|---|
+| `TivaWelcome` | boas-vindas | Último passo do onboarding |
+| `TivaTip` | dica (segurando uma lâmpada) | `/sugestoes`, ao lado do título, só quando há alguma sugestão para mostrar |
+| `TivaCelebrate` | comemoração (patas para cima, confete) | `/planejar/metas`, no cartão de uma meta que atingiu 100% do valor alvo |
+| `TivaPause` | pausa (deitada, "zzz") | Página 404 |
+
+Todos condicionados à preferência `mascot_enabled` do perfil (nunca aparecem se o usuário desligou a mascote em Configurações).
 
 A mascote vive só dentro do produto. As telas públicas (landing, entrar, cadastrar, 404) usam as ilustrações de pessoas acima: uma capivara não comunica "esta é a sua rotina financeira" tão bem quanto uma pessoa usando o app, e o dono pediu explicitamente personagens humanos nessas telas.
 

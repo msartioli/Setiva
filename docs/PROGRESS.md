@@ -183,16 +183,26 @@ Testado no navegador: landing inteira, cadastro, login, 404, e o app autenticado
 
 Testado ponta a ponta no navegador com dados reais: cadastro, onboarding com renda no dia 10, conta com saldo, quatro despesas em categorias diferentes e três limites (um tranquilo, um a 87%, um estourado a 116%), conferindo que as três faixas de alerta aparecem certas e que rosca e barras batem. A conta de teste foi excluída depois pelo próprio fluxo do app, e confirmei que o login dela não funciona mais. Lint, typecheck, os 20 testes e o build passam.
 
+## Fase K — Mascote completa: dica e comemoração
+
+Os dois estados que faltavam da Tiva (`docs/ASSETS.md`), pedidos explicitamente pelo prompt mestre ("boas-vindas, dica, comemoração e pausa").
+
+- `TivaTip` (`src/components/mascot/tiva.tsx`): Tiva em pé segurando uma lâmpada. Aparece em `/sugestoes`, ao lado do título "Sugestões para este mês", só quando existe ao menos uma sugestão de verdade (não aparece no estado vazio "Nada para destacar agora", que já é uma notícia boa por si só).
+- `TivaCelebrate`: Tiva com as duas patas erguidas e confete ao redor. Aparece no cartão de uma meta em `/planejar/metas` quando ela atinge 100% do valor alvo (`reservedCents >= targetCents`), junto com o texto "Meta concluída."
+- Ambos condicionados à mesma preferência `profiles.mascot_enabled` que já existia (buscada agora também nas páginas de Sugestões e Metas, seguindo o padrão do resto do app de cada página buscar o que precisa direto do Supabase).
+- Verificação visual: como o Docker não estava disponível nesta sessão para subir o Supabase local, não deu para testar com dados reais de ponta a ponta (uma sugestão real, uma meta batendo 100%). Em vez disso, os quatro estados da mascote (os dois novos e os dois existentes, para comparação) foram renderizados isolados num HTML estático com os tokens de cor exatos do app, em claro e escuro, conferindo coerência visual e contraste antes de integrar.
+
+Lint, typecheck, os 23 testes e o build de produção passam.
+
 ## Próximos passos (o que ainda falta)
 
-Todos os módulos funcionais principais das seções 13/14 do prompt mestre estão implementados e testados localmente: Hoje, Movimentações, Visão geral (Contas/Cartões/Relatórios), Planejar (Orçamentos/Metas/Recorrências/Dívidas), Importar/Exportar, Sugestões, Notificações, Ajuda, Configurações (perfil/aparência/categorias/segurança/dados). O que resta é polimento visual e conteúdo, não lógica de domínio:
+Todos os módulos funcionais principais das seções 13/14 do prompt mestre estão implementados e testados localmente: Hoje, Movimentações, Visão geral (Contas/Cartões/Relatórios), Planejar (Orçamentos/Metas/Recorrências/Dívidas), Importar/Exportar, Sugestões, Notificações, Ajuda, Configurações (perfil/aparência/categorias/segurança/dados). A landing, autenticação, 404 e mascote também já passaram por redesign completo (Fases H a K). O que resta é polimento visual e conteúdo, não lógica de domínio:
 
 1. **Calendário** (item 5 da lista de telas) não tem view própria — hoje os vencimentos aparecem em Hoje (próximos compromissos) e Sugestões, mas falta uma grade de calendário mensal navegável.
-2. **Landing page** é funcional mas mínima (sem as composições editoriais com fotos, seções de recursos e FAQ descritas na seção 5 do prompt mestre).
-3. **Mascote**: só o estado "boas-vindas" existe (ver Fase G parte 4). Faltam "dica", "comemoração" e "pausa".
-4. **Fotos de estilo de vida** (landing, onboarding, capas de meta): nenhuma foi buscada ainda — precisam de fonte com licença comercial verificável, não Google Imagens.
-5. **Revisão visual final**: screenshots reais em 360/390/768/1440px, contraste WCAG AA, `prefers-reduced-motion`, animações com Motion (hoje as transições são só CSS simples).
-6. **Playwright automatizado**: os testes de fluxo neste projeto foram feitos com scripts Playwright avulsos rodados manualmente durante o desenvolvimento (ver histórico de progresso acima) — não existe uma suíte `tests/e2e/` versionada no repo ainda.
+2. **Fotos de estilo de vida para onboarding e capas de meta**: a landing já tem uma foto real licenciada (`docs/ASSETS.md`), mas onboarding e capas de meta ainda não têm nenhuma — precisam de fonte com licença comercial verificável, não Google Imagens.
+3. **Revisão visual final**: screenshots reais em 360/390/768/1440px, contraste WCAG AA, `prefers-reduced-motion`, animações com Motion (hoje as transições são só CSS simples).
+4. **Playwright automatizado**: os testes de fluxo neste projeto foram feitos com scripts Playwright avulsos rodados manualmente durante o desenvolvimento (ver histórico de progresso acima) — não existe uma suíte `tests/e2e/` versionada no repo ainda.
+5. **Mascote em dados reais**: `TivaTip` e `TivaCelebrate` (Fase K) só foram conferidas isoladas fora do app (Docker indisponível na sessão) — falta ver as duas de verdade dentro do produto, com uma sugestão real e uma meta batendo 100%, assim que houver ambiente local disponível.
 
 ## Pendências externas (agrupadas)
 

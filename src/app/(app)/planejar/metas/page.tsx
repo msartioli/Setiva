@@ -12,7 +12,7 @@ export default async function MetasPage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [{ data: goals }, { data: accounts }] = await Promise.all([
+  const [{ data: goals }, { data: accounts }, { data: profile }] = await Promise.all([
     supabase
       .from("goals")
       .select("id, name, target_cents, reserved_cents, target_date, linked_account_id")
@@ -20,6 +20,7 @@ export default async function MetasPage() {
       .is("archived_at", null)
       .order("created_at"),
     supabase.from("accounts").select("id, name").eq("user_id", user.id).is("archived_at", null).order("name"),
+    supabase.from("profiles").select("mascot_enabled").eq("user_id", user.id).single(),
   ]);
 
   const goalRows: GoalRow[] = (goals ?? []).map((g) => ({
@@ -36,7 +37,7 @@ export default async function MetasPage() {
       <p className="text-sm font-medium text-brand">Planejar</p>
       <h1 className="mb-4 font-display text-2xl text-foreground sm:text-3xl">Planejamento</h1>
       <PlanejarTabs />
-      <GoalsView goals={goalRows} accounts={accounts ?? []} />
+      <GoalsView goals={goalRows} accounts={accounts ?? []} mascotEnabled={profile?.mascot_enabled ?? true} />
     </div>
   );
 }

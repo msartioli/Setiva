@@ -8,18 +8,24 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
 import type { Suggestion } from "@/lib/finance/suggestions";
+import { TivaTip } from "@/components/mascot/tiva";
 
 export function SuggestionsView({
   suggestions,
   marginConfirmedCents,
+  mascotEnabled,
 }: {
   suggestions: Suggestion[];
   marginConfirmedCents: number;
+  mascotEnabled: boolean;
 }) {
   return (
     <div className="flex flex-col gap-8">
       <section>
-        <h2 className="mb-3 font-display text-xl text-foreground">Sugestões para este mês</h2>
+        <div className="mb-3 flex items-center gap-3">
+          {mascotEnabled && suggestions.length > 0 && <TivaTip className="h-14 w-14 shrink-0" />}
+          <h2 className="font-display text-xl text-foreground">Sugestões para este mês</h2>
+        </div>
         {suggestions.length === 0 ? (
           <p className="rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface p-6 text-center text-sm text-foreground-muted">
             Nada para destacar agora. Isso é bom sinal.

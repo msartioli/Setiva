@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
 import { addGoalContribution, archiveGoal, createGoal } from "@/actions/planning";
+import { TivaCelebrate } from "@/components/mascot/tiva";
 
 export interface GoalRow {
   id: string;
@@ -22,7 +23,15 @@ interface AccountOption {
   name: string;
 }
 
-export function GoalsView({ goals, accounts }: { goals: GoalRow[]; accounts: AccountOption[] }) {
+export function GoalsView({
+  goals,
+  accounts,
+  mascotEnabled,
+}: {
+  goals: GoalRow[];
+  accounts: AccountOption[];
+  mascotEnabled: boolean;
+}) {
   const [newOpen, setNewOpen] = useState(false);
   const [contributingGoal, setContributingGoal] = useState<GoalRow | null>(null);
 
@@ -53,7 +62,7 @@ export function GoalsView({ goals, accounts }: { goals: GoalRow[]; accounts: Acc
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {goals.map((g) => (
-            <GoalCard key={g.id} goal={g} onContribute={() => setContributingGoal(g)} />
+            <GoalCard key={g.id} goal={g} mascotEnabled={mascotEnabled} onContribute={() => setContributingGoal(g)} />
           ))}
         </div>
       )}
@@ -76,9 +85,18 @@ export function GoalsView({ goals, accounts }: { goals: GoalRow[]; accounts: Acc
   );
 }
 
-function GoalCard({ goal, onContribute }: { goal: GoalRow; onContribute: () => void }) {
+function GoalCard({
+  goal,
+  mascotEnabled,
+  onContribute,
+}: {
+  goal: GoalRow;
+  mascotEnabled: boolean;
+  onContribute: () => void;
+}) {
   const [isPending, startTransition] = useTransition();
   const ratio = goal.targetCents > 0 ? Math.min(goal.reservedCents / goal.targetCents, 1) : 0;
+  const isComplete = ratio >= 1;
 
   return (
     <div className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
@@ -97,6 +115,9 @@ function GoalCard({ goal, onContribute }: { goal: GoalRow; onContribute: () => v
           <Archive className="size-4" />
         </button>
       </div>
+      {isComplete && mascotEnabled && (
+        <TivaCelebrate className="mx-auto mt-2 h-16 w-16" />
+      )}
       <p className="mt-2 font-medium text-foreground">{goal.name}</p>
       <p className="mt-1 text-sm tabular-figures text-foreground-muted">
         {formatCentsBRL(goal.reservedCents)} de {formatCentsBRL(goal.targetCents)}
@@ -104,6 +125,7 @@ function GoalCard({ goal, onContribute }: { goal: GoalRow; onContribute: () => v
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-background">
         <div className="h-full rounded-full bg-accent" style={{ width: `${ratio * 100}%` }} />
       </div>
+      {isComplete && <p className="mt-2 text-sm font-medium text-brand">Meta concluída.</p>}
       <Button size="sm" variant="secondary" className="mt-3" onClick={onContribute}>
         Aportar
       </Button>
