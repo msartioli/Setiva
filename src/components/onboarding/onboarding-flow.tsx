@@ -450,9 +450,17 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                           selected ? "ring-2 ring-brand ring-offset-2 ring-offset-surface" : ""
                         }`}
                       >
-                        <span className={`flex size-11 items-center justify-center rounded-full text-xs font-semibold ${visual.className}`}>
-                          {visual.abbrev}
-                        </span>
+                        {visual.logo ? (
+                          <span className="flex size-11 items-center justify-center rounded-full bg-background shadow-sm ring-1 ring-border">
+                            <svg viewBox="0 0 24 24" className="size-6" fill={visual.logo.hex} aria-hidden="true">
+                              <path d={visual.logo.path} />
+                            </svg>
+                          </span>
+                        ) : (
+                          <span className={`flex size-11 items-center justify-center rounded-full text-xs font-semibold ${visual.className}`}>
+                            {visual.abbrev}
+                          </span>
+                        )}
                         <span className="w-full truncate text-center text-[11px] text-foreground-muted">{inst.name}</span>
                       </button>
                     );

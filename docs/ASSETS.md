@@ -28,6 +28,17 @@ Licenças conferidas em dicebear.com/licenses em 2026-09-08. Todas CC0 1.0: uso 
 
 Seed de cada avatar (`profiles.avatar_seed`) é uma string curta sorteada ou escolhida a partir de uma lista curada (`CURATED_SEEDS` em `src/lib/avatars.ts`) — nunca derivada de email, CPF ou nome completo do usuário.
 
+## Ícones de instituição (seletor de banco no onboarding)
+
+`src/lib/institution-visuals.ts`. Onboarding pede para o usuário indicar o banco de cada conta (referência visual enviada pelo dono: grade de logos de banco). Verificado se havia logo real com licença livre para as 12 instituições do catálogo (`supabase/migrations/20260908100002...sql`); resultado, checado localmente instalando o pacote (depois removido, só usamos os 3 valores extraídos como constante):
+
+| Instituição | Logo real? |
+|---|---|
+| Nubank, PicPay, Mercado Pago | Sim — path SVG e cor oficial extraídos do pacote `simple-icons` v16.30.0 (CC0 1.0 Universal; a licença cobre o desenho do ícone, a marca em si continua de cada empresa) |
+| Carteira, Banco do Brasil, Caixa Econômica Federal, Bradesco, Itaú, Santander, Inter, C6 Bank, Outra instituição | Não — sem fonte com licença livre encontrada. Sigla curta sobre círculo colorido (paleta `cat-*` já usada nas categorias), nunca um logo recriado à mão (reproduziria marca registrada de terceiro sem licença verificada). |
+
+Se uma fonte de logo com licença livre para os bancos tradicionais aparecer no futuro, atualizar `BY_NAME` em `institution-visuals.ts` seguindo o mesmo padrão dos três já resolvidos.
+
 ## Ilustrações de personagens (landing, autenticação, 404)
 
 `src/components/marketing/illustrations.tsx`: quatro personagens em vetor plano, desenhados aqui como SVG próprio (sem base em ilustração de terceiros, sem biblioteca externa, sem licença a cumprir). Estilo: formas cheias sem contorno, rosto sem traços faciais, paleta da marca mais tons de pele.
