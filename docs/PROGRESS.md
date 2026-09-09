@@ -215,7 +215,7 @@ Todos os módulos funcionais principais das seções 13/14 do prompt mestre est�
 
 ## Pendências externas (agrupadas)
 
-1. **Aplicar as 10 migrations no Supabase remoto** (`docs/SUPABASE-SETUP.md`) — bloqueia qualquer teste real de ponta a ponta contra produção. Até lá, o app roda contra o schema, mas "persistência real validada" só vale depois disso.
+1. **Aplicar o schema no Supabase remoto** — bloqueia qualquer teste real de ponta a ponta contra produção. Até lá, o app roda contra o schema, mas "persistência real validada" só vale depois disso. Duas formas equivalentes, escolha uma (`docs/SUPABASE-SETUP.md`): as 10 migrations individuais em `supabase/migrations/`, ou `supabase/schema_completo.sql` (as mesmas 10 fundidas num único arquivo/transação, gerado em 2026-09-09, revisado quanto a nomes duplicados e balanceamento de sintaxe mas **não executado contra um Postgres real nesta sessão** por falta de Docker disponível).
 2. **Configurar Auth no painel remoto**: Site URL, Redirect URLs, e (antes de liberar cadastro público) SMTP próprio — o Supabase não tem esses valores hoje.
 3. **Configurar `SUPABASE_SERVICE_ROLE_KEY`** no ambiente de produção (nunca `NEXT_PUBLIC_`) — necessária só para exclusão de conta (`src/actions/account.ts`). Ver `.env.example`.
 4. **Identificação jurídica do operador** (razão social, CNPJ, endereço, contato formal) ainda não existe — `/termos` e `/privacidade` têm conteúdo real sobre o que o app faz, mas marcam essa lacuna explicitamente e não devem ser tratadas como termos finais para abertura de cadastro público.

@@ -16,7 +16,11 @@ order by table_name;
 - Se a lista vier vazia, siga direto para "Aplicação em projeto vazio".
 - Se já existir alguma tabela com nomes iguais aos usados aqui (`profiles`, `accounts`, `transactions`, `cards`, etc.), pare e me avise antes de continuar. Não vou lhe indicar `IF NOT EXISTS` como solução porque isso esconderia uma divergência real de schema — o certo é comparar as definições antes de decidir o que fazer.
 
-## Ordem exata dos arquivos
+## Atalho: um único arquivo
+
+`supabase/schema_completo.sql` reúne o conteúdo destas 10 migrations em um arquivo só, dentro de uma única transação (`begin`/`commit`): cola uma vez, clica em Run uma vez, e ou aplica tudo ou não aplica nada (mais seguro que colar 10 vezes, porque uma falha no meio não deixa o schema pela metade). É gerado a partir dos arquivos abaixo; qualquer alteração de schema no futuro continua sendo feita como uma nova migration numerada em `supabase/migrations/`, não editando esse arquivo consolidado. Única diferença de conteúdo: a correção de acentuação da migration 10 já entra direto no `insert` da migration 2, então o arquivo único não tem o passo de "grava errado, depois corrige" — o resultado final no banco é idêntico a rodar as 10 migrations em sequência. Use este arquivo OU a lista abaixo arquivo por arquivo, nunca os dois (senão a segunda tentativa esbarra em tabela já existente).
+
+## Ordem exata dos arquivos (se preferir aplicar um por um)
 
 Aplique um arquivo inteiro por vez, na SQL Editor, exatamente nesta ordem. Cada arquivo é uma transação (`begin` / `commit`): ou aplica tudo, ou nada.
 
