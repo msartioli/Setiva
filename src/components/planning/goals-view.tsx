@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, Archive, Target } from "lucide-react";
+import { useRef, useState, useTransition, type ChangeEvent } from "react";
+import { Plus, Archive, Target, ImagePlus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
-import { addGoalContribution, archiveGoal, createGoal } from "@/actions/planning";
+import { addGoalContribution, archiveGoal, createGoal, removeGoalCover, updateGoalCover } from "@/actions/planning";
 import { TivaCelebrate } from "@/components/mascot/tiva";
 
 export interface GoalRow {
@@ -17,6 +17,7 @@ export interface GoalRow {
   reservedCents: number;
   targetDate: string | null;
   linkedAccountId: string | null;
+  coverUrl: string | null;
 }
 interface AccountOption {
   id: string;
@@ -95,40 +96,98 @@ function GoalCard({
   onContribute: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [coverError, setCoverError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const ratio = goal.targetCents > 0 ? Math.min(goal.reservedCents / goal.targetCents, 1) : 0;
   const isComplete = ratio >= 1;
 
+  function handleCoverChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setCoverError(null);
+    const formData = new FormData();
+    formData.set("file", file);
+    startTransition(async () => {
+      const result = await updateGoalCover(goal.id, formData);
+      if (!result.success) setCoverError(result.error);
+    });
+  }
+
   return (
-    <div className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-foreground-muted">
-          <Target className="size-4" aria-hidden="true" />
-          Meta
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
+      {goal.coverUrl && (
+        <div className="relative h-28 w-full bg-background">
+          <img src={goal.coverUrl} alt="" className="h-full w-full object-cover" />
         </div>
-        <button
-          type="button"
-          aria-label="Arquivar meta"
-          disabled={isPending}
-          onClick={() => startTransition(async () => { await archiveGoal(goal.id); })}
-          className="text-foreground-muted hover:text-negative"
-        >
-          <Archive className="size-4" />
-        </button>
-      </div>
-      {isComplete && mascotEnabled && (
-        <TivaCelebrate className="mx-auto mt-2 h-16 w-16" />
       )}
-      <p className="mt-2 font-medium text-foreground">{goal.name}</p>
-      <p className="mt-1 text-sm tabular-figures text-foreground-muted">
-        {formatCentsBRL(goal.reservedCents)} de {formatCentsBRL(goal.targetCents)}
-      </p>
-      <div className="mt-2 h-2 overflow-hidden rounded-full bg-background">
-        <div className="h-full rounded-full bg-accent" style={{ width: `${ratio * 100}%` }} />
+      <div className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-foreground-muted">
+            <Target className="size-4" aria-hidden="true" />
+            Meta
+          </div>
+          <button
+            type="button"
+            aria-label="Arquivar meta"
+            disabled={isPending}
+            onClick={() => startTransition(async () => { await archiveGoal(goal.id); })}
+            className="text-foreground-muted hover:text-negative"
+          >
+            <Archive className="size-4" />
+          </button>
+        </div>
+        {isComplete && mascotEnabled && (
+          <TivaCelebrate className="mx-auto mt-2 h-16 w-16" />
+        )}
+        <p className="mt-2 font-medium text-foreground">{goal.name}</p>
+        <p className="mt-1 text-sm tabular-figures text-foreground-muted">
+          {formatCentsBRL(goal.reservedCents)} de {formatCentsBRL(goal.targetCents)}
+        </p>
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-background">
+          <div className="h-full rounded-full bg-accent" style={{ width: `${ratio * 100}%` }} />
+        </div>
+        {isComplete && <p className="mt-2 text-sm font-medium text-brand">Meta concluída.</p>}
+
+        <div className="mt-3 flex items-center gap-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={handleCoverChange}
+          />
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline disabled:opacity-60"
+          >
+            <ImagePlus className="size-4" aria-hidden="true" />
+            {goal.coverUrl ? "Trocar capa" : "Adicionar capa"}
+          </button>
+          {goal.coverUrl && (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => startTransition(async () => { await removeGoalCover(goal.id); })}
+              className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-negative disabled:opacity-60"
+            >
+              <X className="size-3.5" aria-hidden="true" />
+              Remover
+            </button>
+          )}
+        </div>
+        {coverError && (
+          <p role="alert" className="mt-1 text-xs text-negative">
+            {coverError}
+          </p>
+        )}
+
+        <Button size="sm" variant="secondary" className="mt-3" onClick={onContribute}>
+          Aportar
+        </Button>
       </div>
-      {isComplete && <p className="mt-2 text-sm font-medium text-brand">Meta concluída.</p>}
-      <Button size="sm" variant="secondary" className="mt-3" onClick={onContribute}>
-        Aportar
-      </Button>
     </div>
   );
 }

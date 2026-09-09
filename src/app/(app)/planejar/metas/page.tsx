@@ -15,7 +15,7 @@ export default async function MetasPage() {
   const [{ data: goals }, { data: accounts }, { data: profile }] = await Promise.all([
     supabase
       .from("goals")
-      .select("id, name, target_cents, reserved_cents, target_date, linked_account_id")
+      .select("id, name, target_cents, reserved_cents, target_date, linked_account_id, cover_image_url")
       .eq("user_id", user.id)
       .is("archived_at", null)
       .order("created_at"),
@@ -23,14 +23,26 @@ export default async function MetasPage() {
     supabase.from("profiles").select("mascot_enabled").eq("user_id", user.id).single(),
   ]);
 
-  const goalRows: GoalRow[] = (goals ?? []).map((g) => ({
-    id: g.id,
-    name: g.name,
-    targetCents: g.target_cents,
-    reservedCents: g.reserved_cents,
-    targetDate: g.target_date,
-    linkedAccountId: g.linked_account_id,
-  }));
+  const goalRows: GoalRow[] = await Promise.all(
+    (goals ?? []).map(async (g) => {
+      let coverUrl: string | null = null;
+      if (g.cover_image_url) {
+        const { data: signed } = await supabase.storage
+          .from("goal-covers")
+          .createSignedUrl(g.cover_image_url, 3600);
+        coverUrl = signed?.signedUrl ?? null;
+      }
+      return {
+        id: g.id,
+        name: g.name,
+        targetCents: g.target_cents,
+        reservedCents: g.reserved_cents,
+        targetDate: g.target_date,
+        linkedAccountId: g.linked_account_id,
+        coverUrl,
+      };
+    })
+  );
 
   return (
     <div>

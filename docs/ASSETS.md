@@ -68,6 +68,10 @@ Usada na seção "Conheça a plataforma", recortada em círculo, com cartões do
 
 Fotos removidas ao longo das revisões de design, todas por não dizerem nada sobre o produto (cena genérica de café/notebook em vez de uma pessoa ou da própria tela): `hero-planning.jpg`, `feature-hands-coffee.jpg`, `feature-phone-outdoors.jpg`. Os espaços que elas ocupavam viraram peças da própria interface (abaixo) ou ilustrações de personagem.
 
+## Capa de meta
+
+Diferente de todo o resto deste documento, a capa de meta (`/planejar/metas`) **não é uma foto buscada por mim**: é um upload próprio do usuário (a foto que ele quiser, do próprio objetivo) via `src/actions/planning.ts` (`updateGoalCover`/`removeGoalCover`), guardada no bucket privado `goal-covers` que já existia desde a migration 9 (`docs/SUPABASE-SETUP.md`) mas nunca tinha UI. Path `{user_id}/{goal_id}.{ext}`, RLS já restringia cada usuário à própria pasta. Como o bucket é privado, a tela lê com `createSignedUrl` (validade de 1 hora, gerada a cada carregamento da página, nunca guardada). Por ser conteúdo do próprio usuário sobre a própria vida financeira, não há questão de licença a verificar aqui.
+
 ## Mockups de interface (landing)
 
 `src/components/marketing/product-mockup.tsx` recria trechos reais de tela do produto em HTML/CSS puro: o resumo do dia em celular (`PhoneMockup`), a agenda do mês (`AgendaMockup`, a tela que dá nome ao "mapa do mês"), a fatura do cartão (`CardsMockup`) e os orçamentos por categoria (`BudgetMockup`). Não são capturas de tela nem imagens, então não têm questão de licenciamento. Usam a paleta de marca com valores fixos, independentes do tema claro/escuro do visitante, de propósito: assim aparecem sempre como o app aparece no tema padrão, do mesmo jeito que uma captura de tela apareceria. Os números exibidos são exemplos ilustrativos, não dados de um cliente real.

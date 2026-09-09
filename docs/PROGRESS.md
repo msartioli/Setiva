@@ -194,15 +194,24 @@ Os dois estados que faltavam da Tiva (`docs/ASSETS.md`), pedidos explicitamente 
 
 Lint, typecheck, os 23 testes e o build de produção passam.
 
+## Fase L — Capa de meta (upload próprio, não banco de imagens)
+
+Ao investigar o item pendente "capas de meta" (`docs/ASSETS.md`), descoberto que a Fase B já tinha criado o necessário no banco para isso: coluna `goals.cover_image_url` e o bucket privado `goal-covers` com RLS completo (migration 9), só que sem nenhuma UI que os usasse. Não era um caso de "buscar foto de banco de imagens" (diferente de landing/onboarding): o prompt mestre pede uma capa por meta, e a arquitetura já provisionada era claramente para o usuário subir a própria foto (viagem, casa etc.), não uma foto de estoque genérica.
+
+- `src/actions/planning.ts`: `updateGoalCover` (valida tipo PNG/JPEG/WEBP e até 4 MB, sobe pro bucket em `{user_id}/{goal_id}.{ext}`, remove o arquivo antigo se a extensão mudou) e `removeGoalCover`.
+- `src/app/(app)/planejar/metas/page.tsx`: gera uma URL assinada (1h) por meta que tiver capa, já que o bucket é privado.
+- `src/components/planning/goals-view.tsx`: banner de capa no topo do cartão da meta, botões "Adicionar capa"/"Trocar capa"/"Remover".
+- **Não testado com Supabase real nesta sessão** (Docker indisponível): typecheck, lint (1 warning esperado do `<img>` nativo, mesmo padrão já aceito para os avatares DiceBear) e build de produção passam, mas falta confirmar upload/leitura de verdade contra um Postgres/Storage real assim que houver ambiente disponível.
+
 ## Próximos passos (o que ainda falta)
 
 Todos os módulos funcionais principais das seções 13/14 do prompt mestre estão implementados e testados localmente: Hoje, Movimentações, Visão geral (Contas/Cartões/Relatórios), Planejar (Orçamentos/Metas/Recorrências/Dívidas), Importar/Exportar, Sugestões, Notificações, Ajuda, Configurações (perfil/aparência/categorias/segurança/dados). A landing, autenticação, 404 e mascote também já passaram por redesign completo (Fases H a K). O que resta é polimento visual e conteúdo, não lógica de domínio:
 
 1. **Calendário** (item 5 da lista de telas) não tem view própria — hoje os vencimentos aparecem em Hoje (próximos compromissos) e Sugestões, mas falta uma grade de calendário mensal navegável.
-2. **Fotos de estilo de vida para onboarding e capas de meta**: a landing já tem uma foto real licenciada (`docs/ASSETS.md`), mas onboarding e capas de meta ainda não têm nenhuma — precisam de fonte com licença comercial verificável, não Google Imagens.
+2. **Fotos de estilo de vida no onboarding**: a landing já tem uma foto real licenciada (`docs/ASSETS.md`) e a capa de meta virou upload próprio do usuário (Fase L, não precisa de banco de imagens); falta só o onboarding, que exige repensar o layout atual (coluna única estreita, `step-shell.tsx`) para caber imagem — decisão de design ainda em aberto, não fazer sem alinhar antes.
 3. **Revisão visual final**: screenshots reais em 360/390/768/1440px, contraste WCAG AA, `prefers-reduced-motion`, animações com Motion (hoje as transições são só CSS simples).
 4. **Playwright automatizado**: os testes de fluxo neste projeto foram feitos com scripts Playwright avulsos rodados manualmente durante o desenvolvimento (ver histórico de progresso acima) — não existe uma suíte `tests/e2e/` versionada no repo ainda.
-5. **Mascote em dados reais**: `TivaTip` e `TivaCelebrate` (Fase K) só foram conferidas isoladas fora do app (Docker indisponível na sessão) — falta ver as duas de verdade dentro do produto, com uma sugestão real e uma meta batendo 100%, assim que houver ambiente local disponível.
+5. **Testar contra Supabase real assim que houver ambiente disponível** (Docker indisponível durante esta sessão): `TivaTip`/`TivaCelebrate` (Fase K) dentro do produto com dados reais, e o upload/leitura de capa de meta (Fase L) de ponta a ponta.
 
 ## Pendências externas (agrupadas)
 

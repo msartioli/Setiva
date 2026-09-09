@@ -198,6 +198,77 @@ export async function addGoalContribution(input: GoalContributionInput): Promise
   }
 }
 
+const GOAL_COVER_MAX_BYTES = 4 * 1024 * 1024;
+const GOAL_COVER_EXTENSION_BY_TYPE: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
+
+export async function updateGoalCover(goalId: string, formData: FormData): Promise<ActionResult> {
+  try {
+    const { supabase, userId } = await requireUser();
+    const file = formData.get("file");
+    if (!(file instanceof File) || file.size === 0) return { success: false, error: "Selecione uma imagem." };
+    const extension = GOAL_COVER_EXTENSION_BY_TYPE[file.type];
+    if (!extension) return { success: false, error: "Use uma imagem PNG, JPEG ou WEBP." };
+    if (file.size > GOAL_COVER_MAX_BYTES) return { success: false, error: "A imagem deve ter até 4 MB." };
+
+    const { data: existing } = await supabase
+      .from("goals")
+      .select("cover_image_url")
+      .eq("id", goalId)
+      .eq("user_id", userId)
+      .single();
+
+    const path = `${userId}/${goalId}.${extension}`;
+    const { error: uploadError } = await supabase.storage
+      .from("goal-covers")
+      .upload(path, file, { contentType: file.type, upsert: true });
+    if (uploadError) throw uploadError;
+
+    if (existing?.cover_image_url && existing.cover_image_url !== path) {
+      await supabase.storage.from("goal-covers").remove([existing.cover_image_url]);
+    }
+
+    const { error } = await supabase
+      .from("goals")
+      .update({ cover_image_url: path })
+      .eq("id", goalId)
+      .eq("user_id", userId);
+    if (error) throw error;
+    revalidatePlanejar();
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: (e as Error).message };
+  }
+}
+
+export async function removeGoalCover(goalId: string): Promise<ActionResult> {
+  try {
+    const { supabase, userId } = await requireUser();
+    const { data: goal } = await supabase
+      .from("goals")
+      .select("cover_image_url")
+      .eq("id", goalId)
+      .eq("user_id", userId)
+      .single();
+    if (goal?.cover_image_url) {
+      await supabase.storage.from("goal-covers").remove([goal.cover_image_url]);
+    }
+    const { error } = await supabase
+      .from("goals")
+      .update({ cover_image_url: null })
+      .eq("id", goalId)
+      .eq("user_id", userId);
+    if (error) throw error;
+    revalidatePlanejar();
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: (e as Error).message };
+  }
+}
+
 export async function archiveGoal(id: string): Promise<ActionResult> {
   try {
     const { supabase, userId } = await requireUser();
