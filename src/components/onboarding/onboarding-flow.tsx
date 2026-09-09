@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { StepShell, Chip } from "./step-shell";
-import { TivaWelcome } from "@/components/mascot/tiva";
+import { MascotEnabledProvider } from "./onboarding-scene";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -168,10 +168,13 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
   const back = (target: number) => run(() => goBackToStep(target), () => setStep(target));
 
   return (
-    <div className="bg-background">
+    <MascotEnabledProvider value={mascotEnabled}>
       {error && (
-        <div className="mx-auto max-w-xl px-6 pt-6 sm:px-0">
-          <p role="alert" className="rounded-[var(--radius-md)] bg-negative-soft px-3.5 py-2.5 text-sm text-negative">
+        <div className="fixed inset-x-0 top-4 z-50 mx-auto w-full max-w-md px-4">
+          <p
+            role="alert"
+            className="rounded-[var(--radius-md)] border border-negative/20 bg-negative-soft px-3.5 py-2.5 text-sm text-negative shadow-lg"
+          >
             {error}
           </p>
         </div>
@@ -902,16 +905,33 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             </Button>
           }
         >
-          <div className="rounded-[var(--radius-lg)] border border-border bg-surface p-8 text-center">
-            {mascotEnabled && <TivaWelcome className="mx-auto mb-4 h-28 w-28" />}
-            <p className="font-display text-xl text-foreground">Bem-vindo à Setiva.</p>
-            <p className="mt-2 text-sm text-foreground-muted">
-              Você pode revisitar essas configurações a qualquer momento em Configurações.
+          <div className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface">
+            <div className="bg-forest px-8 py-7 text-forest-foreground">
+              <p className="font-display text-2xl">Bem-vindo à Setiva.</p>
+              <p className="mt-1.5 text-sm text-forest-foreground/75">
+                Seu mapa do mês já nasce preenchido com o que você contou aqui.
+              </p>
+            </div>
+            <ul className="divide-y divide-border">
+              {[
+                { label: "Contas cadastradas", value: String(accounts.length) },
+                { label: "Fontes de renda", value: String(incomeSources.length) },
+                { label: "Contas fixas do mês", value: String(bills.length) },
+                { label: "Limites definidos", value: String(budgetCategoryIds.length) },
+              ].map((row) => (
+                <li key={row.label} className="flex items-center justify-between px-8 py-3.5 text-sm">
+                  <span className="text-foreground-muted">{row.label}</span>
+                  <span className="font-display text-lg tabular-figures text-foreground">{row.value}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="px-8 py-4 text-xs text-foreground-muted">
+              Dá para revisitar tudo isso quando quiser em Configurações.
             </p>
           </div>
         </StepShell>
       )}
-    </div>
+    </MascotEnabledProvider>
   );
 
   function addBill() {
