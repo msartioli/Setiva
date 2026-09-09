@@ -19,6 +19,7 @@ import {
   type AvatarFamilyKey,
 } from "@/lib/avatars";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
+import { institutionVisual } from "@/lib/institution-visuals";
 import {
   advanceToReview,
   finishOnboarding,
@@ -104,6 +105,8 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
   const [accountName, setAccountName] = useState("");
   const [accountKind, setAccountKind] = useState<AccountKind>("checking");
   const [accountBalance, setAccountBalance] = useState("");
+  const [accountNegative, setAccountNegative] = useState(false);
+  const [accountInstitutionId, setAccountInstitutionId] = useState<string | null>(null);
 
   // Passo 5
   const [cards, setCards] = useState<
@@ -419,11 +422,44 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             onRemove={(i) => setAccounts((prev) => prev.filter((_, idx) => idx !== i))}
             render={(item) => (
               <span>
-                {item.name}: {formatCentsBRL(item.initialBalanceCents)}
+                {item.name}:{" "}
+                <span className={item.initialBalanceCents < 0 ? "text-negative" : undefined}>
+                  {formatCentsBRL(item.initialBalanceCents)}
+                </span>
               </span>
             )}
           />
-          <div className="mt-4 flex flex-col gap-3 rounded-[var(--radius-lg)] border border-border bg-surface p-4">
+          <div className="mt-4 flex flex-col gap-4 rounded-[var(--radius-lg)] border border-border bg-surface p-4">
+            {props.institutions.length > 0 && (
+              <div>
+                <p className="mb-2 text-sm font-medium text-foreground">Qual banco é essa conta?</p>
+                <div className="flex flex-wrap gap-3">
+                  {props.institutions.map((inst) => {
+                    const visual = institutionVisual(inst.name);
+                    const selected = accountInstitutionId === inst.id;
+                    return (
+                      <button
+                        key={inst.id}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => {
+                          setAccountInstitutionId(selected ? null : inst.id);
+                          if (!selected && !accountName.trim()) setAccountName(inst.name);
+                        }}
+                        className={`flex w-16 flex-col items-center gap-1 rounded-[var(--radius-md)] p-1.5 transition-colors duration-[var(--motion-fast)] ${
+                          selected ? "ring-2 ring-brand ring-offset-2 ring-offset-surface" : ""
+                        }`}
+                      >
+                        <span className={`flex size-11 items-center justify-center rounded-full text-xs font-semibold ${visual.className}`}>
+                          {visual.abbrev}
+                        </span>
+                        <span className="w-full truncate text-center text-[11px] text-foreground-muted">{inst.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input placeholder="Nome da conta" value={accountName} onChange={(e) => setAccountName(e.target.value)} />
               <select
@@ -444,16 +480,26 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                 onChange={(e) => setAccountBalance(e.target.value)}
               />
             </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={accountNegative} onCheckedChange={setAccountNegative} />
+              <span className="text-sm text-foreground-muted">Saldo negativo (conta no vermelho)</span>
+            </div>
             <Button
               type="button"
               variant="secondary"
               onClick={() => {
                 if (!accountName.trim()) return;
                 try {
-                  const cents = accountBalance.trim() ? parseBRLToCents(accountBalance) : 0;
-                  setAccounts((prev) => [...prev, { name: accountName, kind: accountKind, institutionId: null, initialBalanceCents: cents }]);
+                  let cents = accountBalance.trim() ? parseBRLToCents(accountBalance) : 0;
+                  if (accountNegative) cents = -Math.abs(cents);
+                  setAccounts((prev) => [
+                    ...prev,
+                    { name: accountName, kind: accountKind, institutionId: accountInstitutionId, initialBalanceCents: cents },
+                  ]);
                   setAccountName("");
                   setAccountBalance("");
+                  setAccountNegative(false);
+                  setAccountInstitutionId(null);
                 } catch {
                   setError("Saldo inválido.");
                 }

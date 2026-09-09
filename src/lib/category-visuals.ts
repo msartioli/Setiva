@@ -86,7 +86,7 @@ const BY_NAME: Record<string, string> = {
   "outras despesas": "more-horizontal",
 };
 
-function normalize(value: string): string {
+export function normalize(value: string): string {
   return value
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
