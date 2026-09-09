@@ -1,22 +1,26 @@
 "use client";
 
-import { motion, useReducedMotion, AnimatePresence, type Variants } from "motion/react";
-import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { motion, useReducedMotion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { OnboardingScene } from "./onboarding-scene";
 
 /**
- * Moldura de cada passo do onboarding: cena animada com a mascote a
- * esquerda (faixa verde, ondas, formas flutuantes) e o formulario a
- * direita, com entrada em cascata a cada troca de passo.
+ * Moldura de cada passo do onboarding.
  *
- * A API de props e a mesma de antes de proposito (step/title/subtitle/
- * onBack/onSkip/skipLabel/children/footer): a repaginacao e toda visual,
- * nenhum dos 12 passos precisou mudar de logica.
+ * Direcao visual escolhida pelo dono: card central minimalista, no padrao
+ * de onboarding de SaaS tipo Linear/Vercel — fundo neutro uniforme, um
+ * unico card branco estreito centrado, muito respiro, indicador de passo
+ * discreto. Sem ilustracao, sem mascote, sem faixa colorida: a atencao fica
+ * na pergunta.
+ *
+ * A API de props e a mesma desde a primeira versao (step/title/subtitle/
+ * onBack/onSkip/skipLabel/children/footer), entao trocar a linguagem visual
+ * nao exigiu mexer na logica de nenhum dos 12 passos.
  */
 
 const TOTAL_STEPS = 12;
+const CARD_WIDTH = "max-w-[520px]";
 
 export function StepShell({
   step,
@@ -39,100 +43,77 @@ export function StepShell({
 }) {
   const reduce = useReducedMotion();
 
-  const container: Variants = {
-    hidden: {},
-    show: { transition: { staggerChildren: reduce ? 0 : 0.07, delayChildren: reduce ? 0 : 0.05 } },
-  };
-  const item: Variants = {
-    hidden: reduce ? { opacity: 0 } : { opacity: 0, y: 16 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: reduce ? 0.15 : 0.45, ease: [0.22, 1, 0.36, 1] },
-    },
-  };
-
   return (
-    // grid-rows explicito: sem ele, o min-h-svh distribui a altura extra
-    // entre as linhas automaticas e empurra o formulario para baixo da
-    // dobra no mobile/tablet (o banner fica com uma folga fantasma).
-    <div className="grid min-h-svh grid-cols-1 grid-rows-[auto_1fr] lg:grid-cols-[minmax(0,26rem)_1fr] lg:grid-rows-[1fr]">
-      {/* Cena: faixa lateral no desktop, topo compacto no mobile */}
-      <aside className="relative hidden lg:block">
-        <div className="sticky top-0 h-svh">
-          <OnboardingScene step={step} />
+    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-5 py-10 sm:py-16">
+      <div className={cn("w-full", CARD_WIDTH)}>
+        <div className="mb-8 flex flex-col items-center gap-6">
+          <Image src="/brand/symbol.png" alt="Setiva" width={32} height={32} className="size-8" priority />
+          <StepDots step={step} reduce={Boolean(reduce)} />
         </div>
-      </aside>
-      <div className="relative h-36 lg:hidden">
-        <OnboardingScene step={step} variant="banner" />
-      </div>
 
-      {/* Formulario */}
-      <main className="flex flex-col bg-background px-6 py-10 sm:px-10 lg:px-14 lg:py-12">
-        <div className="mx-auto flex w-full max-w-xl flex-1 flex-col">
-          <div className="mb-8 hidden items-center gap-1.5 lg:flex" aria-hidden="true">
-            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-              <motion.span
-                key={i}
-                initial={false}
-                animate={{
-                  backgroundColor: i < step ? "var(--brand)" : "var(--border)",
-                  scaleY: i === step - 1 ? 1.6 : 1,
-                }}
-                transition={reduce ? { duration: 0 } : { duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                className="h-1 flex-1 origin-center rounded-full"
-              />
-            ))}
-          </div>
-
+        <div className="rounded-[var(--radius-xl)] border border-border bg-surface p-7 shadow-sm sm:p-9">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
-              variants={container}
-              initial="hidden"
-              animate="show"
-              exit={reduce ? { opacity: 0 } : { opacity: 0, y: -12, transition: { duration: 0.2 } }}
-              className="flex flex-1 flex-col"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
+              transition={{ duration: reduce ? 0.12 : 0.22, ease: [0.22, 1, 0.36, 1] }}
             >
-              <motion.h1
-                variants={item}
-                className="font-display text-3xl leading-tight text-foreground text-balance sm:text-4xl"
-              >
-                {title}
-              </motion.h1>
-              <motion.p variants={item} className="mt-3 text-base text-foreground-muted">
-                {subtitle}
-              </motion.p>
+              <h1 className="font-display text-2xl leading-snug text-foreground text-balance">{title}</h1>
+              <p className="mt-2 text-sm leading-relaxed text-foreground-muted">{subtitle}</p>
 
-              <motion.div variants={item} className="mt-9 flex-1">
-                {children}
-              </motion.div>
-
-              <motion.div
-                variants={item}
-                className="mt-10 flex items-center justify-between gap-3 border-t border-border pt-6"
-              >
-                <div>
-                  {onBack && (
-                    <Button type="button" variant="ghost" onClick={onBack}>
-                      <ArrowLeft className="size-4" aria-hidden="true" />
-                      Voltar
-                    </Button>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  {onSkip && (
-                    <Button type="button" variant="ghost" onClick={onSkip}>
-                      {skipLabel}
-                    </Button>
-                  )}
-                  {footer}
-                </div>
-              </motion.div>
+              <div className="mt-7">{children}</div>
             </motion.div>
           </AnimatePresence>
         </div>
-      </main>
+
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <div>
+            {onBack && (
+              <Button type="button" variant="ghost" size="sm" onClick={onBack}>
+                Voltar
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {onSkip && (
+              <Button type="button" variant="ghost" size="sm" onClick={onSkip}>
+                {skipLabel}
+              </Button>
+            )}
+            {footer}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Pontos discretos; o passo atual vira uma pilula alongada. */
+function StepDots({ step, reduce }: { step: number; reduce: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      role="progressbar"
+      aria-valuenow={step}
+      aria-valuemin={1}
+      aria-valuemax={TOTAL_STEPS}
+      aria-label={`Passo ${step} de ${TOTAL_STEPS}`}
+    >
+      {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+        const isCurrent = i === step - 1;
+        const isDone = i < step - 1;
+        return (
+          <motion.span
+            key={i}
+            initial={false}
+            animate={{ width: isCurrent ? 20 : 6, opacity: isDone || isCurrent ? 1 : 0.45 }}
+            transition={reduce ? { duration: 0 } : { duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className={cn("h-1.5 rounded-full", isDone || isCurrent ? "bg-brand" : "bg-border-strong")}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -146,23 +127,19 @@ export function Chip({
   onClick: () => void;
   children: React.ReactNode;
 }) {
-  const reduce = useReducedMotion();
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      whileTap={reduce ? undefined : { scale: 0.96 }}
-      whileHover={reduce ? undefined : { y: -2 }}
-      transition={{ duration: 0.15 }}
       className={cn(
-        "rounded-[var(--radius-pill)] border px-4 py-2 text-sm font-medium transition-colors duration-[var(--motion-fast)]",
+        "rounded-[var(--radius-md)] border px-3.5 py-2 text-sm transition-colors duration-[var(--motion-fast)]",
         selected
-          ? "border-brand bg-brand text-brand-foreground shadow-sm"
-          : "border-border bg-surface text-foreground hover:border-border-strong"
+          ? "border-brand bg-brand/8 font-medium text-foreground"
+          : "border-border bg-surface text-foreground-muted hover:border-border-strong hover:text-foreground"
       )}
     >
       {children}
-    </motion.button>
+    </button>
   );
 }

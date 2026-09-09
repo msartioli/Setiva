@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { StepShell, Chip } from "./step-shell";
-import { MascotEnabledProvider } from "./onboarding-scene";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -168,9 +167,9 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
   const back = (target: number) => run(() => goBackToStep(target), () => setStep(target));
 
   return (
-    <MascotEnabledProvider value={mascotEnabled}>
+    <>
       {error && (
-        <div className="fixed inset-x-0 top-4 z-50 mx-auto w-full max-w-md px-4">
+        <div className="fixed inset-x-0 top-4 z-50 mx-auto w-full max-w-[520px] px-5">
           <p
             role="alert"
             className="rounded-[var(--radius-md)] border border-negative/20 bg-negative-soft px-3.5 py-2.5 text-sm text-negative shadow-lg"
@@ -449,7 +448,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                 />
               </div>
             )}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input placeholder="Nome da conta" value={accountName} onChange={(e) => setAccountName(e.target.value)} />
               <select
                 value={accountKind}
@@ -538,7 +537,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
           />
           <div className="mt-4 flex flex-col gap-3 rounded-[var(--radius-lg)] border border-border bg-surface p-4">
             <Input placeholder="Nome do cartão (ex: Nubank)" value={cardName} onChange={(e) => setCardName(e.target.value)} />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Limite" htmlFor="cardLimit">
                 <Input id="cardLimit" inputMode="decimal" value={cardLimit} onChange={(e) => setCardLimit(e.target.value)} />
               </Field>
@@ -613,7 +612,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             )}
           />
           <div className="mt-4 flex flex-col gap-3 rounded-[var(--radius-lg)] border border-border bg-surface p-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Input
                 placeholder="Descrição"
                 value={billDesc}
@@ -905,33 +904,27 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             </Button>
           }
         >
-          <div className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface">
-            <div className="bg-forest px-8 py-7 text-forest-foreground">
-              <p className="font-display text-2xl">Bem-vindo à Setiva.</p>
-              <p className="mt-1.5 text-sm text-forest-foreground/75">
-                Seu mapa do mês já nasce preenchido com o que você contou aqui.
-              </p>
-            </div>
-            <ul className="divide-y divide-border">
+          <div>
+            <ul className="divide-y divide-border rounded-[var(--radius-md)] border border-border">
               {[
                 { label: "Contas cadastradas", value: String(accounts.length) },
                 { label: "Fontes de renda", value: String(incomeSources.length) },
                 { label: "Contas fixas do mês", value: String(bills.length) },
                 { label: "Limites definidos", value: String(budgetCategoryIds.length) },
               ].map((row) => (
-                <li key={row.label} className="flex items-center justify-between px-8 py-3.5 text-sm">
+                <li key={row.label} className="flex items-center justify-between px-4 py-3 text-sm">
                   <span className="text-foreground-muted">{row.label}</span>
-                  <span className="font-display text-lg tabular-figures text-foreground">{row.value}</span>
+                  <span className="tabular-figures font-medium text-foreground">{row.value}</span>
                 </li>
               ))}
             </ul>
-            <p className="px-8 py-4 text-xs text-foreground-muted">
+            <p className="mt-4 text-xs text-foreground-muted">
               Dá para revisitar tudo isso quando quiser em Configurações.
             </p>
           </div>
         </StepShell>
       )}
-    </MascotEnabledProvider>
+    </>
   );
 
   function addBill() {
