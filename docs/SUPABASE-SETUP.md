@@ -34,6 +34,7 @@ Aplique um arquivo inteiro por vez, na SQL Editor, exatamente nesta ordem. Cada 
 8. `20260908100008_imports_audit_consents.sql` — importação de CSV, auditoria mínima e consentimentos.
 9. `20260908100009_storage_indexes_views.sql` — buckets de Storage, políticas e views de apoio.
 10. `20260908100010_category_accents.sql` — corrige acentuação dos nomes de catálogo (categorias e instituições) que a migration 2 gravou sem acento.
+11. `20260909100011_account_institution_snapshot.sql` — **não está no `schema_completo.sql`** (foi criada depois). Se você já aplicou o arquivo consolidado, aplique só esta migration agora, sozinha: adiciona colunas novas em `accounts` (ISPB/COMPE/nome/logo da instituição real escolhida, mais `connection_type`), aditiva, não mexe em dado existente.
 
 ### Aplicação em projeto vazio
 

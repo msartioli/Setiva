@@ -38,4 +38,17 @@ describe("parseBRLToCents / formatCentsBRL", () => {
   it("formata centavos em BRL", () => {
     expect(formatCentsBRL(123456)).toContain("1.234,56");
   });
+
+  it.each([
+    ["1000", 100000],
+    ["0", 0],
+    ["-100", -10000],
+    ["-2500.75", -250075],
+  ])("saldo de conta aceita %s sem virar zero nem perder o sinal", (input, expected) => {
+    expect(parseBRLToCents(input)).toBe(expected);
+  });
+
+  it("saldo negativo nunca vira positivo ao formatar", () => {
+    expect(formatCentsBRL(-45000)).toMatch(/^-/);
+  });
 });

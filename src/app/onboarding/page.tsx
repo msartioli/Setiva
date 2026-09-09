@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
+import { getFinancialInstitutions } from "@/lib/integrations/financial-institutions/service";
 
 export const metadata: Metadata = {
   title: "Configurar minha conta",
@@ -15,12 +16,12 @@ export default async function OnboardingPage() {
 
   if (!user) redirect("/entrar");
 
-  const [{ data: profile }, { data: state }, { data: categories }, { data: institutions }, { data: accounts }] =
+  const [{ data: profile }, { data: state }, { data: categories }, institutions, { data: accounts }] =
     await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", user.id).single(),
       supabase.from("onboarding_state").select("*").eq("user_id", user.id).single(),
       supabase.from("categories").select("id, name, kind").is("user_id", null).order("name"),
-      supabase.from("institutions").select("id, name, kind").order("sort_order"),
+      getFinancialInstitutions(),
       supabase.from("accounts").select("id, name").eq("user_id", user.id).is("archived_at", null),
     ]);
 
@@ -39,7 +40,7 @@ export default async function OnboardingPage() {
       }}
       incomeCategories={(categories ?? []).filter((c) => c.kind === "income")}
       expenseCategories={(categories ?? []).filter((c) => c.kind === "expense")}
-      institutions={institutions ?? []}
+      institutions={institutions}
       existingAccounts={accounts ?? []}
     />
   );

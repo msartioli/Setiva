@@ -28,16 +28,11 @@ Licenças conferidas em dicebear.com/licenses em 2026-09-08. Todas CC0 1.0: uso 
 
 Seed de cada avatar (`profiles.avatar_seed`) é uma string curta sorteada ou escolhida a partir de uma lista curada (`CURATED_SEEDS` em `src/lib/avatars.ts`) — nunca derivada de email, CPF ou nome completo do usuário.
 
-## Ícones de instituição (seletor de banco no onboarding)
+## Logos de instituição financeira (seletor de banco)
 
-`src/lib/institution-visuals.ts`. Onboarding pede para o usuário indicar o banco de cada conta (referência visual enviada pelo dono: grade de logos de banco). Verificado se havia logo real com licença livre para as 12 instituições do catálogo (`supabase/migrations/20260908100002...sql`); resultado, checado localmente instalando o pacote (depois removido, só usamos os 3 valores extraídos como constante):
+**Substituído.** A primeira tentativa (registrada aqui numa versão anterior deste documento) cobria só 3 bancos com ícones do pacote `simple-icons`. Trocado pelo pacote `logos-bancos-br` (npm, MIT, ver `docs/integrations/financial-data.md`): dataset com ~1090 instituições financeiras brasileiras reais, a maioria já com logo oficial (via Open Finance Brasil ou site oficial, revisado por humano na origem do próprio pacote — nunca copiado/recriado por nós). Cobre de verdade Nubank, Itaú, Bradesco, Banco do Brasil, Caixa, Santander, Inter, Mercado Pago, PicPay, C6 Bank e centenas de outras.
 
-| Instituição | Logo real? |
-|---|---|
-| Nubank, PicPay, Mercado Pago | Sim — path SVG e cor oficial extraídos do pacote `simple-icons` v16.30.0 (CC0 1.0 Universal; a licença cobre o desenho do ícone, a marca em si continua de cada empresa) |
-| Carteira, Banco do Brasil, Caixa Econômica Federal, Bradesco, Itaú, Santander, Inter, C6 Bank, Outra instituição | Não — sem fonte com licença livre encontrada. Sigla curta sobre círculo colorido (paleta `cat-*` já usada nas categorias), nunca um logo recriado à mão (reproduziria marca registrada de terceiro sem licença verificada). |
-
-Se uma fonte de logo com licença livre para os bancos tradicionais aparecer no futuro, atualizar `BY_NAME` em `institution-visuals.ts` seguindo o mesmo padrão dos três já resolvidos.
+`src/lib/institution-visuals.ts` guarda só o fallback genérico (sigla + cor determinística da paleta `cat-*`, mesma usada nas categorias) para a minoria de instituições sem logo no dataset, ou se a imagem falhar ao carregar. Nunca um logo de banco recriado à mão.
 
 ## Ilustrações de personagens (landing, autenticação, 404)
 

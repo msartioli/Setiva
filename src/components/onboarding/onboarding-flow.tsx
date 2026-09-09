@@ -19,7 +19,9 @@ import {
   type AvatarFamilyKey,
 } from "@/lib/avatars";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
-import { institutionVisual } from "@/lib/institution-visuals";
+import { BankSelector } from "@/components/banks/bank-selector";
+import { BankLogo } from "@/components/banks/bank-logo";
+import type { FinancialInstitution } from "@/lib/integrations/financial-institutions/types";
 import {
   advanceToReview,
   finishOnboarding,
@@ -40,11 +42,6 @@ interface CategoryOption {
   id: string;
   name: string;
 }
-interface InstitutionOption {
-  id: string;
-  name: string;
-  kind: string;
-}
 interface AccountOption {
   id: string;
   name: string;
@@ -55,7 +52,7 @@ interface OnboardingFlowProps {
   profile: { displayName: string; nickname: string; avatarSeed: string; avatarStyle: string };
   incomeCategories: CategoryOption[];
   expenseCategories: CategoryOption[];
-  institutions: InstitutionOption[];
+  institutions: FinancialInstitution[];
   existingAccounts: AccountOption[];
 }
 
@@ -100,13 +97,13 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
   // Passo 4
   type AccountKind = "checking" | "savings" | "wallet" | "investment" | "other";
   const [accounts, setAccounts] = useState<
-    { name: string; kind: AccountKind; institutionId: string | null; initialBalanceCents: number }[]
+    { name: string; kind: AccountKind; institutionIspb: string | null; institution: FinancialInstitution | null; initialBalanceCents: number }[]
   >([]);
   const [accountName, setAccountName] = useState("");
   const [accountKind, setAccountKind] = useState<AccountKind>("checking");
   const [accountBalance, setAccountBalance] = useState("");
   const [accountNegative, setAccountNegative] = useState(false);
-  const [accountInstitutionId, setAccountInstitutionId] = useState<string | null>(null);
+  const [accountInstitution, setAccountInstitution] = useState<FinancialInstitution | null>(null);
 
   // Passo 5
   const [cards, setCards] = useState<
@@ -405,7 +402,10 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                   () =>
                     saveAccountsStep({
                       accounts: accounts.map((a) => ({
-                        ...a,
+                        name: a.name,
+                        kind: a.kind,
+                        institutionIspb: a.institutionIspb,
+                        initialBalanceCents: a.initialBalanceCents,
                         initialBalanceDate: today(),
                       })),
                     }),
@@ -421,58 +421,40 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             items={accounts}
             onRemove={(i) => setAccounts((prev) => prev.filter((_, idx) => idx !== i))}
             render={(item) => (
-              <span>
-                {item.name}:{" "}
-                <span className={item.initialBalanceCents < 0 ? "text-negative" : undefined}>
-                  {formatCentsBRL(item.initialBalanceCents)}
+              <span className="flex items-center gap-2">
+                {item.institution && <BankLogo name={item.institution.shortName} logoUrl={item.institution.logoUrl} className="size-6 shrink-0" />}
+                <span>
+                  {item.name}:{" "}
+                  <span className={item.initialBalanceCents < 0 ? "text-negative" : undefined}>
+                    {formatCentsBRL(item.initialBalanceCents)}
+                  </span>
                 </span>
               </span>
             )}
           />
           <div className="mt-4 flex flex-col gap-4 rounded-[var(--radius-lg)] border border-border bg-surface p-4">
-            {props.institutions.length > 0 && (
+            {accountKind !== "wallet" && (
               <div>
-                <p className="mb-2 text-sm font-medium text-foreground">Qual banco é essa conta?</p>
-                <div className="flex flex-wrap gap-3">
-                  {props.institutions.map((inst) => {
-                    const visual = institutionVisual(inst.name);
-                    const selected = accountInstitutionId === inst.id;
-                    return (
-                      <button
-                        key={inst.id}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() => {
-                          setAccountInstitutionId(selected ? null : inst.id);
-                          if (!selected && !accountName.trim()) setAccountName(inst.name);
-                        }}
-                        className={`flex w-16 flex-col items-center gap-1 rounded-[var(--radius-md)] p-1.5 transition-colors duration-[var(--motion-fast)] ${
-                          selected ? "ring-2 ring-brand ring-offset-2 ring-offset-surface" : ""
-                        }`}
-                      >
-                        {visual.logo ? (
-                          <span className="flex size-11 items-center justify-center rounded-full bg-background shadow-sm ring-1 ring-border">
-                            <svg viewBox="0 0 24 24" className="size-6" fill={visual.logo.hex} aria-hidden="true">
-                              <path d={visual.logo.path} />
-                            </svg>
-                          </span>
-                        ) : (
-                          <span className={`flex size-11 items-center justify-center rounded-full text-xs font-semibold ${visual.className}`}>
-                            {visual.abbrev}
-                          </span>
-                        )}
-                        <span className="w-full truncate text-center text-[11px] text-foreground-muted">{inst.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <p className="mb-2 text-sm font-medium text-foreground">Qual banco é essa conta? (opcional)</p>
+                <BankSelector
+                  institutions={props.institutions}
+                  value={accountInstitution}
+                  onSelect={(inst) => {
+                    setAccountInstitution(inst);
+                    if (inst && !accountName.trim()) setAccountName(inst.shortName || inst.name);
+                  }}
+                />
               </div>
             )}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Input placeholder="Nome da conta" value={accountName} onChange={(e) => setAccountName(e.target.value)} />
               <select
                 value={accountKind}
-                onChange={(e) => setAccountKind(e.target.value as AccountKind)}
+                onChange={(e) => {
+                  const kind = e.target.value as AccountKind;
+                  setAccountKind(kind);
+                  if (kind === "wallet") setAccountInstitution(null);
+                }}
                 className="h-11 rounded-[var(--radius-md)] border border-border bg-surface px-3 text-sm"
               >
                 <option value="checking">Conta corrente</option>
@@ -502,12 +484,18 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                   if (accountNegative) cents = -Math.abs(cents);
                   setAccounts((prev) => [
                     ...prev,
-                    { name: accountName, kind: accountKind, institutionId: accountInstitutionId, initialBalanceCents: cents },
+                    {
+                      name: accountName,
+                      kind: accountKind,
+                      institutionIspb: accountInstitution?.ispb ?? null,
+                      institution: accountInstitution,
+                      initialBalanceCents: cents,
+                    },
                   ]);
                   setAccountName("");
                   setAccountBalance("");
                   setAccountNegative(false);
-                  setAccountInstitutionId(null);
+                  setAccountInstitution(null);
                 } catch {
                   setError("Saldo inválido.");
                 }

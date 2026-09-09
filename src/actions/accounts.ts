@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { accountFormSchema, type AccountFormInput } from "@/lib/validations/accounts";
+import { getFinancialInstitutionByIspb } from "@/lib/integrations/financial-institutions/service";
 
 export type ActionResult = { success: true } | { success: false; error: string };
 
@@ -21,10 +22,17 @@ export async function createAccount(input: AccountFormInput): Promise<ActionResu
 
   try {
     const { supabase, userId } = await requireUser();
+    const institution = parsed.data.institutionIspb
+      ? await getFinancialInstitutionByIspb(parsed.data.institutionIspb)
+      : null;
     const { error } = await supabase.from("accounts").insert({
       user_id: userId,
       name: parsed.data.name,
       kind: parsed.data.kind,
+      institution_ispb: institution?.ispb ?? null,
+      institution_compe: institution?.compe ?? null,
+      institution_display_name: institution?.shortName ?? institution?.name ?? null,
+      institution_logo_url: institution?.logoUrl ?? null,
       initial_balance_cents: parsed.data.initialBalanceCents,
       initial_balance_date: parsed.data.initialBalanceDate,
     });

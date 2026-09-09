@@ -6,14 +6,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { Switch } from "@/components/ui/switch";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
 import { archiveAccount, createAccount } from "@/actions/accounts";
+import { BankSelector } from "@/components/banks/bank-selector";
+import { BankLogo } from "@/components/banks/bank-logo";
+import type { FinancialInstitution } from "@/lib/integrations/financial-institutions/types";
 
 export interface AccountWithBalance {
   id: string;
   name: string;
   kind: string;
   balanceCents: number;
+  institutionName: string | null;
+  institutionLogoUrl: string | null;
 }
 
 const KIND_LABELS: Record<string, string> = {
@@ -24,7 +30,13 @@ const KIND_LABELS: Record<string, string> = {
   other: "Outra",
 };
 
-export function AccountsView({ accounts }: { accounts: AccountWithBalance[] }) {
+export function AccountsView({
+  accounts,
+  institutions,
+}: {
+  accounts: AccountWithBalance[];
+  institutions: FinancialInstitution[];
+}) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -42,7 +54,7 @@ export function AccountsView({ accounts }: { accounts: AccountWithBalance[] }) {
             <DialogHeader>
               <DialogTitle>Nova conta</DialogTitle>
             </DialogHeader>
-            <NewAccountForm onDone={() => setDialogOpen(false)} />
+            <NewAccountForm institutions={institutions} onDone={() => setDialogOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -70,7 +82,11 @@ function AccountCard({ account }: { account: AccountWithBalance }) {
     <div className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-foreground-muted">
-          <Wallet className="size-4" aria-hidden="true" />
+          {account.institutionName ? (
+            <BankLogo name={account.institutionName} logoUrl={account.institutionLogoUrl} className="size-5 shrink-0" />
+          ) : (
+            <Wallet className="size-4" aria-hidden="true" />
+          )}
           {KIND_LABELS[account.kind] ?? account.kind}
         </div>
         {!confirming ? (
@@ -107,9 +123,18 @@ function AccountCard({ account }: { account: AccountWithBalance }) {
   );
 }
 
-function NewAccountForm({ onDone }: { onDone: () => void }) {
+function NewAccountForm({
+  institutions,
+  onDone,
+}: {
+  institutions: FinancialInstitution[];
+  onDone: () => void;
+}) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [kind, setKind] = useState("checking");
+  const [institution, setInstitution] = useState<FinancialInstitution | null>(null);
+  const [negative, setNegative] = useState(false);
 
   return (
     <form
@@ -119,11 +144,13 @@ function NewAccountForm({ onDone }: { onDone: () => void }) {
         const form = new FormData(e.currentTarget);
         setError(null);
         try {
-          const initialBalanceCents = form.get("balance") ? parseBRLToCents(String(form.get("balance"))) : 0;
+          let initialBalanceCents = form.get("balance") ? parseBRLToCents(String(form.get("balance"))) : 0;
+          if (negative) initialBalanceCents = -Math.abs(initialBalanceCents);
           startTransition(async () => {
             const result = await createAccount({
               name: String(form.get("name")),
-              kind: form.get("kind") as never,
+              kind: kind as never,
+              institutionIspb: institution?.ispb ?? null,
               initialBalanceCents,
               initialBalanceDate: String(form.get("date")),
             });
@@ -139,7 +166,15 @@ function NewAccountForm({ onDone }: { onDone: () => void }) {
         <Input id="name" name="name" required placeholder="Ex: Nubank" />
       </Field>
       <Field label="Tipo" htmlFor="kind">
-        <select id="kind" name="kind" className="h-11 rounded-[var(--radius-md)] border border-border bg-surface px-3 text-sm">
+        <select
+          id="kind"
+          value={kind}
+          onChange={(e) => {
+            setKind(e.target.value);
+            if (e.target.value === "wallet") setInstitution(null);
+          }}
+          className="h-11 rounded-[var(--radius-md)] border border-border bg-surface px-3 text-sm"
+        >
           <option value="checking">Conta corrente</option>
           <option value="savings">Poupança</option>
           <option value="wallet">Carteira</option>
@@ -147,6 +182,11 @@ function NewAccountForm({ onDone }: { onDone: () => void }) {
           <option value="other">Outra</option>
         </select>
       </Field>
+      {kind !== "wallet" && (
+        <Field label="Banco (opcional)" htmlFor="institution">
+          <BankSelector institutions={institutions} value={institution} onSelect={setInstitution} />
+        </Field>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <Field label="Saldo atual" htmlFor="balance" optional>
           <Input id="balance" name="balance" inputMode="decimal" placeholder="R$ 0,00" />
@@ -154,6 +194,10 @@ function NewAccountForm({ onDone }: { onDone: () => void }) {
         <Field label="Data do saldo" htmlFor="date">
           <Input id="date" name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} required />
         </Field>
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch checked={negative} onCheckedChange={setNegative} />
+        <span className="text-sm text-foreground-muted">Saldo negativo (conta no vermelho)</span>
       </div>
       {error && <p role="alert" className="text-sm text-negative">{error}</p>}
       <DialogFooter>

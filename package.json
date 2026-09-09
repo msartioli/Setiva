@@ -38,6 +38,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
+    "logos-bancos-br": "^0.7.2",
     "lucide-react": "^1.43.0",
     "motion": "^13.2.0",
     "next": "16.3.4",

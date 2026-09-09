@@ -30,7 +30,12 @@ export type IncomeStepInput = z.infer<typeof incomeStepSchema>;
 export const accountSchema = z.object({
   name: z.string().trim().min(1).max(60),
   kind: z.enum(["checking", "savings", "wallet", "investment", "other"]),
-  institutionId: z.string().uuid().nullable(),
+  // So o ISPB; nome/logo da instituicao sao resolvidos no servidor a partir
+  // dele, nunca aceitos do cliente (ver saveAccountsStep).
+  institutionIspb: z
+    .string()
+    .regex(/^\d{8}$/, "ISPB invalido")
+    .nullable(),
   initialBalanceCents: z.number().int(),
   initialBalanceDate: z.string(),
 });

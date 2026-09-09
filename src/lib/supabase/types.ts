@@ -38,12 +38,17 @@ export type Database = {
         Row: {
           archived_at: string | null
           color: string
+          connection_type: string
           created_at: string
           icon: string
           id: string
           initial_balance_cents: number
           initial_balance_date: string
+          institution_compe: string | null
+          institution_display_name: string | null
           institution_id: string | null
+          institution_ispb: string | null
+          institution_logo_url: string | null
           kind: string
           name: string
           updated_at: string
@@ -52,12 +57,17 @@ export type Database = {
         Insert: {
           archived_at?: string | null
           color?: string
+          connection_type?: string
           created_at?: string
           icon?: string
           id?: string
           initial_balance_cents?: number
           initial_balance_date?: string
+          institution_compe?: string | null
+          institution_display_name?: string | null
           institution_id?: string | null
+          institution_ispb?: string | null
+          institution_logo_url?: string | null
           kind: string
           name: string
           updated_at?: string
@@ -66,12 +76,17 @@ export type Database = {
         Update: {
           archived_at?: string | null
           color?: string
+          connection_type?: string
           created_at?: string
           icon?: string
           id?: string
           initial_balance_cents?: number
           initial_balance_date?: string
+          institution_compe?: string | null
+          institution_display_name?: string | null
           institution_id?: string | null
+          institution_ispb?: string | null
+          institution_logo_url?: string | null
           kind?: string
           name?: string
           updated_at?: string

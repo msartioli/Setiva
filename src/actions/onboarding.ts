@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/types";
 import { setThemeCookie } from "@/lib/theme-cookie";
+import { getFinancialInstitutionByIspb } from "@/lib/integrations/financial-institutions/service";
 import {
   accountsStepSchema,
   budgetsStepSchema,
@@ -149,14 +150,22 @@ export async function saveAccountsStep(input: AccountsStepInput): Promise<StepRe
   try {
     const { supabase, userId } = await requireUser();
     if (parsed.data.accounts.length > 0) {
-      const rows = parsed.data.accounts.map((a) => ({
-        user_id: userId,
-        name: a.name,
-        kind: a.kind,
-        institution_id: a.institutionId,
-        initial_balance_cents: a.initialBalanceCents,
-        initial_balance_date: a.initialBalanceDate,
-      }));
+      const rows = await Promise.all(
+        parsed.data.accounts.map(async (a) => {
+          const institution = a.institutionIspb ? await getFinancialInstitutionByIspb(a.institutionIspb) : null;
+          return {
+            user_id: userId,
+            name: a.name,
+            kind: a.kind,
+            institution_ispb: institution?.ispb ?? null,
+            institution_compe: institution?.compe ?? null,
+            institution_display_name: institution?.shortName ?? institution?.name ?? null,
+            institution_logo_url: institution?.logoUrl ?? null,
+            initial_balance_cents: a.initialBalanceCents,
+            initial_balance_date: a.initialBalanceDate,
+          };
+        })
+      );
       const { error } = await supabase.from("accounts").insert(rows);
       if (error) throw error;
     }
