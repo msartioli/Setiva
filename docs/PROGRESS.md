@@ -203,6 +203,16 @@ Ao investigar o item pendente "capas de meta" (`docs/ASSETS.md`), descoberto que
 - `src/components/planning/goals-view.tsx`: banner de capa no topo do cartão da meta, botões "Adicionar capa"/"Trocar capa"/"Remover".
 - **Não testado com Supabase real nesta sessão** (Docker indisponível): typecheck, lint (1 warning esperado do `<img>` nativo, mesmo padrão já aceito para os avatares DiceBear) e build de produção passam, mas falta confirmar upload/leitura de verdade contra um Postgres/Storage real assim que houver ambiente disponível.
 
+## Fase M — Bug real encontrado ao aplicar no remoto: policy de Storage não era re-aplicável
+
+O dono tentou aplicar `supabase/schema_completo.sql` (gerado nesta sessão a partir das 10 migrations) no SQL Editor do projeto remoto e recebeu `ERROR: 42710: policy "avatars_select_own" for table "objects" already exists`.
+
+Causa: `storage.objects` é uma tabela do sistema, compartilhada pelo projeto inteiro — ao contrário das tabelas do schema `public`, ela **não é limpa por um reset do schema public**. Uma tentativa anterior (aplicação manual de parte das migrations, ou um reset parcial do schema public sem limpar Storage) deixou essas 8 policies (`avatars_*`, `goal_covers_*`) já criadas. Como cada `create policy` original não tinha guarda de idempotência, a segunda tentativa falhou exatamente aí. Por estar tudo dentro de uma única transação, a falha não deixou nada pela metade: tudo o que essa tentativa tinha criado antes (tabelas 01-08, buckets) foi revertido junto — o schema `public` ficou vazio de novo, só o `storage.objects` manteve as 8 policies órfãs.
+
+Corrigido em **`supabase/migrations/20260908100009_storage_indexes_views.sql`** (fonte de verdade) e em **`supabase/schema_completo.sql`**: cada uma das 8 policies agora leva um `drop policy if exists <nome> on storage.objects;` imediatamente antes do `create policy`, tornando essa seção segura para rodar de novo independentemente do que sobrou de tentativas anteriores. Nenhuma outra parte do schema foi alterada (tabelas, tipos e índices continuam sem guarda de idempotência de propósito, para uma colisão ali sempre aparecer e ser investigada, em vez de mascarada — mesma lógica já documentada em `docs/SUPABASE-SETUP.md`).
+
+**Ainda não confirmado que o arquivo corrigido aplica limpo no remoto** — o dono precisa tentar de novo.
+
 ## Próximos passos (o que ainda falta)
 
 Todos os módulos funcionais principais das seções 13/14 do prompt mestre estão implementados e testados localmente: Hoje, Movimentações, Visão geral (Contas/Cartões/Relatórios), Planejar (Orçamentos/Metas/Recorrências/Dívidas), Importar/Exportar, Sugestões, Notificações, Ajuda, Configurações (perfil/aparência/categorias/segurança/dados). A landing, autenticação, 404 e mascote também já passaram por redesign completo (Fases H a K). O que resta é polimento visual e conteúdo, não lógica de domínio:

@@ -2183,43 +2183,55 @@ on conflict (id) do nothing;
 
 -- Convencao de caminho: {user_id}/{arquivo}. O primeiro segmento do path
 -- e comparado a auth.uid() para restringir cada usuario a sua propria pasta.
+-- storage.objects e uma tabela do sistema, compartilhada pelo projeto
+-- inteiro: sobrevive a um reset do schema public, entao "drop policy if
+-- exists" antes de recriar evita erro 42710 se uma tentativa anterior
+-- ja tiver chegado ate aqui.
+drop policy if exists avatars_select_own on storage.objects;
 create policy avatars_select_own
   on storage.objects for select
   to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
+drop policy if exists avatars_insert_own on storage.objects;
 create policy avatars_insert_own
   on storage.objects for insert
   to authenticated
   with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
+drop policy if exists avatars_update_own on storage.objects;
 create policy avatars_update_own
   on storage.objects for update
   to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text)
   with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
+drop policy if exists avatars_delete_own on storage.objects;
 create policy avatars_delete_own
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
+drop policy if exists goal_covers_select_own on storage.objects;
 create policy goal_covers_select_own
   on storage.objects for select
   to authenticated
   using (bucket_id = 'goal-covers' and (storage.foldername(name))[1] = auth.uid()::text);
 
+drop policy if exists goal_covers_insert_own on storage.objects;
 create policy goal_covers_insert_own
   on storage.objects for insert
   to authenticated
   with check (bucket_id = 'goal-covers' and (storage.foldername(name))[1] = auth.uid()::text);
 
+drop policy if exists goal_covers_update_own on storage.objects;
 create policy goal_covers_update_own
   on storage.objects for update
   to authenticated
   using (bucket_id = 'goal-covers' and (storage.foldername(name))[1] = auth.uid()::text)
   with check (bucket_id = 'goal-covers' and (storage.foldername(name))[1] = auth.uid()::text);
 
+drop policy if exists goal_covers_delete_own on storage.objects;
 create policy goal_covers_delete_own
   on storage.objects for delete
   to authenticated
