@@ -34,14 +34,20 @@ export function generateRandomSeed(): string {
   return Math.random().toString(36).slice(2, 10);
 }
 
+// Fundo solido colorido atras de cada avatar: sem isso, o tracado escuro do
+// Notionists some contra o papel claro do app (ilegivel em miniatura). Só
+// tons claros da paleta, para o traço escuro sempre ter contraste.
+const AVATAR_BACKGROUNDS = ["d8efe1", "fbeacb", "dceaf2", "fbe3d8"];
+
 export function avatarDataUri(family: AvatarFamilyKey, seed: string): string {
+  const common = { seed, size: 96, backgroundColor: AVATAR_BACKGROUNDS, backgroundType: ["solid" as const] };
   switch (family) {
     case "retratos":
-      return createAvatar(notionists, { seed, size: 96 }).toDataUri();
+      return createAvatar(notionists, common).toDataUri();
     case "formas":
-      return createAvatar(shapes, { seed, size: 96 }).toDataUri();
+      return createAvatar(shapes, common).toDataUri();
     case "tracos":
-      return createAvatar(thumbs, { seed, size: 96 }).toDataUri();
+      return createAvatar(thumbs, common).toDataUri();
   }
 }
 

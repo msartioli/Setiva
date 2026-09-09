@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { setThemeCookie } from "@/lib/theme-cookie";
 
 export type ActionResult = { success: true } | { success: false; error: string };
 
@@ -73,6 +74,7 @@ export async function updatePreferences(input: z.infer<typeof preferencesSchema>
       })
       .eq("user_id", user.id);
     if (error) throw error;
+    await setThemeCookie(parsed.data.theme);
     return { success: true };
   } catch (e) {
     return { success: false, error: (e as Error).message };

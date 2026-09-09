@@ -9,8 +9,8 @@ export default function TermosPage() {
     <PublicPage title="Termos de uso" updatedAt={`versão ${TERMS_VERSION}, 08/09/2026`}>
       <p>
         Este documento descreve as condições de uso da Setiva, um aplicativo web de organização financeira
-        pessoal, no estado atual de desenvolvimento. Ele cobre exatamente o que o aplicativo faz hoje — não
-        promete funcionalidades futuras.
+        pessoal, no estado atual de desenvolvimento. Ele cobre exatamente o que o aplicativo faz hoje, sem
+        prometer funcionalidades futuras.
       </p>
 
       <h2>O que a Setiva é</h2>
@@ -30,7 +30,7 @@ export default function TermosPage() {
       <h2>Limites do que mostramos</h2>
       <p>
         Projeções de saldo, sugestões e simulações são cálculos determinísticos a partir dos dados que você
-        cadastrou — não são garantia, previsão de mercado nem recomendação de investimento. Dados incompletos
+        cadastrou. Não são garantia, previsão de mercado nem recomendação de investimento. Dados incompletos
         geram estimativas incompletas: a Setiva não deve ser o único critério para uma decisão financeira
         importante.
       </p>

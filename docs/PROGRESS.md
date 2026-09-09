@@ -88,6 +88,101 @@ Existe um projeto anterior em `C:\Users\matheus.artioli\Projetos\finance-saas` (
 - **Bug de UX encontrado e corrigido**: o cadastro linkava para `/termos` e `/privacidade`, que não existiam (404). Criadas com conteúdo real sobre o que o app efetivamente faz — sem inventar razão social/CNPJ/contato, que ficam marcados como pendentes de publicação (ver Pendências externas). `/creditos` lista as bibliotecas e licenças (DiceBear CC0, fontes, ícones).
 - Mascote Tiva: primeiro estado real (`TivaWelcome`, SVG original em `src/components/mascot/tiva.tsx`) no último passo do onboarding, condicionado à preferência `mascotEnabled`. Estados "dica", "comemoração" e "pausa" continuam pendentes (ver `docs/ASSETS.md`).
 
+## Fase G (parte 5) — Correções de design real após revisão do dono (concluída e testada no navegador)
+
+O dono revisou capturas de tela reais e apontou, com razão, que o polimento visual ficou muito abaixo do funcional. Problemas concretos corrigidos:
+
+1. **Bug de layout**: o botão "Novo lançamento" sobrepunha "Visão geral" no cabeçalho em larguras intermediárias. Causa: o nav central usava `position: absolute` dentro de um container `justify-between`, que não reserva espaço para ele. Corrigido trocando para grid de 3 colunas (`grid-cols-[auto_1fr_auto]`), com rótulos dos itens de nav escondidos abaixo de `lg` para não espremer.
+2. **Checkboxes nativos do navegador em todo o app** (cadastro, onboarding, configurações, importação, recorrências): substituídos por `Checkbox`/`Switch` de verdade (Radix), com o mesmo sistema de cor/raio do resto da interface. Isso sozinho resolvia a maior parte da sensação de "quebrado".
+3. **Bug real, mais sério: a preferência de tema (claro/escuro) nunca era aplicada.** Ficava salva em `profiles.theme`, mas nada escrevia `data-theme` na tag `<html>` — escolher "Escuro" ou "Claro" não tinha efeito nenhum; só o tema do sistema operacional valia. Corrigido com um cookie leve (`src/lib/theme-cookie.ts`) escrito sempre que a preferência muda (`updatePreferences`, `savePreferencesStep`) ou no login, lido pelo layout raiz (`src/app/layout.tsx`) para decidir `data-theme` antes da primeira renderização. Testado: escolher Escuro/Claro agora muda a cor de fundo de verdade e persiste depois de recarregar. Custo aceito: como o layout raiz agora lê cookies, as páginas públicas deixaram de ser pré-renderizadas estaticamente (todas viram `ƒ` dinâmico no build) — correção da funcionalidade teve prioridade sobre esse ganho de performance.
+4. Faltava também o token `--lime-strong` no bloco `[data-theme="dark"]` explícito (só existia no bloco de `prefers-color-scheme`), fazendo o tema "Escuro" manual divergir sutilmente do "Automático". Corrigido.
+5. **Avatares minúsculos e sem contraste**: o estilo Notionists é traço preto sobre fundo transparente — em 40-48px sobre o papel claro ficava ilegível e sem nada a ver com a proposta de marca. Corrigido com fundo colorido sólido (paleta da marca, via `backgroundColor`/`backgroundType` do próprio DiceBear) e avatares maiores (64px, círculo com anel de seleção) no onboarding e em Configurações.
+6. **Página Hoje estruturalmente incompleta**: faltavam "visão visual das contas", "sugestão explicável" e "acesso a metas" que o prompt mestre pedia para o dashboard — daí a sensação de página vazia. Adicionadas as três seções (lista de contas, destaque da sugestão principal via `computeSuggestions` reaproveitado de Sugestões, mini-lista de metas com progresso).
+
+Ainda pendente de uma futura passada: animações com Motion (hoje só transições CSS simples), passeio guiado da spec (5 pontos), e o polimento editorial completo da landing/mascote com fotos.
+
+## Fase H (parcial) — Repaginação da landing, login/cadastro, 404 e tipografia (concluída e testada no navegador)
+
+A pedido do dono, depois de ver a Fase G rodando: landing considerada "site novo", tipografia rejeitada, pediu algo inovador com fotos reais, elementos geométricos/wave animados e uma 404 de verdade.
+
+- **Tipografia trocada em todo o site**: Fraunces saiu, entrou Bricolage Grotesque (títulos, peso variável) mantendo Inter no corpo/tabelas. Um só lugar (`src/app/layout.tsx` + `--font-display` em `globals.css`), then propaga para app e marketing.
+- **Fotos reais licenciadas**: 3 fotos do Unsplash (License gratuita, uso comercial liberado), buscadas e baixadas de verdade, não Google Imagens. Uma candidata inicial era do Unsplash+ (camada paga) e foi descartada ao conferir o domínio antes de baixar — registrado em `docs/ASSETS.md` como lembrete. Arquivos em `public/images/`, créditos completos documentados.
+- **Elemento de assinatura visual**: `src/components/marketing/flow-wave.tsx`, uma linha de fluxo de caixa que se desenha sozinha com nós flutuantes (o mesmo conceito do mapa do mês, não uma onda decorativa qualquer), mais `geo-field.tsx` (formas geométricas flutuando) e `cta-button.tsx` (botão com microinteração de hover/tap via Motion).
+- **Landing inteira reconstruída** (`src/app/page.tsx`): header fixo escuro, hero com headline grande + wave animada + mini-cards de exemplo, seção "um mapa não uma planilha" com foto real, "como funciona" em 3 passos, grade de 6 recursos com conteúdo específico (não genérico), segunda seção com foto, FAQ em acordeão com perguntas e respostas reais (sem estatística inventada, sem depoimento fake, sem preço inventado), CTA final e rodapé.
+- **Login e cadastro reconstruídos** (`src/components/layout/auth-shell.tsx`): painel escuro com foto real (opacidade baixa, atrás de gradiente), a mesma FlowWave, formulário à direita já herda a fonte nova.
+- **Página 404 de verdade** (`src/app/not-found.tsx`): fundo escuro, wave, formas geométricas, e o segundo estado da mascote Tiva (`TivaPause`, deitada e "zzz"), com call to action de volta para o mapa do mês.
+- **Achado durante a implementação**: `bg-ink` inicialmente reaproveitava o token `--ink`, que **inverte** no modo escuro do usuário (vira a cor clara) — isso faria o herói escuro da landing virar claro se alguém tivesse o tema "Escuro" ativado. Corrigido com um token novo e fixo (`--ink-fixed`, nunca redefinido nos blocos de dark mode), reservado só para composição de marketing, independente da preferência de tema do app.
+- **Revisão de texto**: ao mexer em tantas telas, uma auditoria por `grep` achou vários travessões usados como recurso estilístico em textos de interface (onboarding, ajuda, termos, privacidade, diálogos), o que o próprio prompt mestre proíbe. Todos substituídos por pontuação normal (ponto, dois-pontos, vírgula).
+- Efeito colateral aceito: como o layout raiz já lia cookies (tema) desde a Fase G, isso não mudou; mas a landing e paginas publicas continuam `ƒ` dinâmicas no build (sem pré-renderização estática), decisão já tomada antes por causa do tema.
+
+Testado no navegador: 404 real, cadastro e login com o novo visual, landing completa em light mode nas rolagens principais, fonte nova aplicada dentro do app autenticado também. Lint, typecheck, os 28 testes automatizados e o build de produção passam.
+
+Pendente ainda desta fase: passeio guiado (tutorial) de até 5 pontos.
+
+### Correção depois da primeira entrega (mesmo dia): landing ainda genérica
+
+O dono viu a primeira versão e apontou, com capturas de tela: seção de perguntas "genérica" visualmente e sem ícone algum, uma das duas fotos de banco de imagens sem relação clara com o texto ao lado e com espaço vazio sobrando ao redor, os "três passos" só com número gigante e nada mais, e pediu algo mais específico do produto, não "algo que qualquer um faz".
+
+- **Bug real encontrado ao testar**: depois de adicionar ícone em cada pergunta do FAQ, a página quebrou (erro 500). Causa: o ícone (um componente React) estava sendo passado como prop de `src/app/page.tsx` (Server Component) para `FaqItem` (Client Component, `"use client"`) — funções/componentes não podem atravessar essa fronteira, só dados serializáveis ou elementos já renderizados. Corrigido renderizando o ícone (`<item.icon />`) ainda no componente de servidor e passando o elemento já pronto como prop, não a referência do componente.
+- **Peça nova**: `src/components/marketing/product-mockup.tsx`, uma réplica em HTML/CSS puro (sem captura de tela, sem imagem) de duas telas reais do produto (mapa do mês de `/hoje`, fatura de cartão de `/visao-geral/cartoes`), dentro de uma moldura de navegador. Usa a paleta de marca sempre fixa (não segue tema claro/escuro do visitante, mesmo raciocínio do `--ink-fixed`), documentado em `docs/ASSETS.md`.
+- Uma das duas fotos de banco de imagens saiu da landing (a de "pessoa sorrindo com celular ao ar livre", removida de `public/images/`) e o espaço virou a seção com o mockup da fatura, com blob colorido atrás.
+- A foto que ficou (café e notebook) ganhou um cartão flutuante sobreposto no canto ("Tempo pra organizar o mês: 3 minutos") e um blob de cor atrás, pra não sobrar tanto vazio ao redor da imagem.
+- O herói trocou a onda abstrata + números soltos por esse mesmo mockup do mapa do mês, com dois cartões flutuantes sobrepostos nos cantos (como uma tela real, não uma ilustração genérica de gráfico).
+- "Como funciona": os três passos ganharam um ícone dentro de um círculo da cor da marca, ligados por uma linha, número ficou pequeno ao lado do título em vez de gigante e sozinho.
+- "Recursos": os seis ícones agora alternam de cor (marca, argila, verde, névoa, azul, lima), em vez de todos na mesma cor neutra.
+- Removida a etiqueta "Registro manual e importação de CSV, sem conexão automática com bancos" do topo do herói, a pedido do dono.
+
+Testado no navegador depois da correção: as 5 seções de novo, com o erro 500 resolvido, e ícone de cada pergunta aparecendo corretamente. Lint, typecheck, os 20 testes unitários e o build de produção passam de novo.
+
+## Fase I — Redesign seguindo a referência visual enviada pelo dono
+
+O dono rejeitou as duas tentativas anteriores de landing e mandou capturas de tela de uma referência concreta (contasonline.com.br), pedindo o mesmo vocabulário visual: ícones, personagens ilustrados, a tipografia, e login/cadastro no mesmo padrão. Nas rodadas anteriores eu vinha impondo direção própria em vez de seguir a referência; esta fase segue a referência.
+
+**Paleta refeita a partir do próprio logo.** O logo da Setiva é esmeralda vivo, mas o app inteiro usava um verde-oliva acinzentado que não combinava com ele. Trocado: verde profundo (`--forest`, faixas escuras), esmeralda (`--brand`) e dourado (`--accent`, só para ação), fundo cinza-claro. Como só `globals.css` conhecia os valores brutos, a troca foi central e propagou para o app inteiro sem tocar em componente. Tokens fixos (`--forest-fixed`) para as faixas verdes de marketing, que não podem inverter com o tema escuro do usuário.
+
+**Tipografia unificada** em Plus Jakarta Sans (títulos e corpo), geométrica e arredondada como a da referência. Saíram Bricolage Grotesque e Inter.
+
+**Personagens ilustrados** (`src/components/marketing/illustrations.tsx`): quatro pessoas em vetor plano, SVG desenhado aqui, sem biblioteca e sem licença a cumprir. Dois tons de pele diferentes de propósito. `PersonPointing` (herói, apontando para o celular, com a mão passando na frente da tela como na referência), `PersonWithPhone` (painel de entrar/cadastrar), `PersonCelebrating` (chamada final), `PersonSearching` (404).
+
+**Peças de composição** (`src/components/marketing/pieces.tsx`): pílula de seção em caixa alta, selo de ícone em quadrado arredondado, lista de recursos com divisórias finas, cartão verde que emoldura uma tela do produto. Tudo no padrão da referência.
+
+**Mockups de tela ampliados** (`product-mockup.tsx`): além da fatura, agora existem o resumo do dia em celular, a agenda do mês em grade e os orçamentos com barras. Continuam HTML/CSS, não imagem.
+
+**Foto de pessoa de volta, no lugar certo.** A referência usa um retrato recortado em círculo; foi isso que se fez, com cartões do produto sobrepostos. Retrato buscado no Unsplash com licença gratuita conferida antes de baixar (`images.unsplash.com`, não `plus.`); descartados no caminho os resultados marcados "Getty Images (Premium)". As três fotos de cena anteriores foram removidas do projeto por não dizerem nada sobre o produto.
+
+**Login, cadastro e 404** reconstruídos no mesmo vocabulário: painel verde com lista de benefícios marcados, personagem com cartões flutuantes, círculos decorativos.
+
+Bugs reais encontrados e corrigidos durante esta fase:
+- Landing quebrou com erro 500 ao dar ícone às perguntas: o ícone (componente React) estava sendo passado de `page.tsx` (Server Component) para `FaqItem` (Client Component). Componentes não atravessam essa fronteira. Corrigido renderizando o ícone no servidor e passando o elemento pronto.
+- Herói: a coluna do grid era `auto` e colapsou com filho `w-full`, jogando o personagem para fora da tela à direita. Corrigido fixando a largura da coluna.
+- Personagem sentado renderizava como barras soltas (as formas de perna sentada não fechavam). Redesenhado em pé, com a mesma estrutura do personagem que já funcionava.
+- Fundo dos avatares do DiceBear ainda usava os hex da paleta antiga; atualizado para os tons novos.
+
+Removidos por terem ficado sem uso: `flow-wave.tsx`, `geo-field.tsx` e as três fotos antigas.
+
+Testado no navegador: landing inteira, cadastro, login, 404, e o app autenticado (cadastro real, onboarding completo até `/hoje`) para conferir que a troca de paleta não quebrou contraste em botão, cabeçalho ou estado vazio. Lint, typecheck, os 20 testes unitários e o build de produção passam.
+
+## Fase J — Ajustes pedidos pelo dono: landing enxuta, dia da renda, gráficos e ícones
+
+**Landing.** Removido o dedo apontando da ilustração do herói (ficava lendo como um retângulo solto). Os dois botões do herói viraram um só, "Teste grátis". A seção final inteira ("Comece a ver seu mês com clareza") saiu, junto com a ilustração que só ela usava.
+
+**Dia da renda no onboarding.** O passo 3 fixava `anchorDay: 5` no código: toda renda caía no dia 5, independente do que a pessoa recebesse. Agora tem campo "Todo dia", validado de 1 a 31, e a lista mostra "Salário: R$ 5.000,00, todo dia 10". A server action já aceitava `anchorDay`, então não precisou de migration. Verificado no navegador: uma renda cadastrada no dia 10 aparece em próximos compromissos como 10/09 e 10/10.
+
+**Gráficos novos em /hoje.**
+- `BudgetAlerts`: limites do mês em barras, com três faixas (dentro, perto do limite a partir de 80%, estourado). O aviso de 80% é o que importa: depois de estourar, avisar já não evita o gasto. Cada faixa tem texto próprio dizendo para segurar o gasto naquela categoria.
+- `CategoryDonut`: rosca de despesas do mês por categoria, com legenda, valor e percentual. No máximo 6 fatias nomeadas mais "Outras", para a rosca não virar um arco-íris ilegível.
+- `MonthFlowChart`: barras de entrou/saiu/sobrou no mês, na coluna lateral.
+
+**Consistência entre telas (decisão de implementação).** O gasto por categoria da rosca é calculado em `src/lib/month-spending.ts`, que soma as **mesmas duas fontes** que a view `budget_progress`: transações de despesa (menos pagamento de fatura) e parcelas de cartão pelo mês da compra. Se somasse só `transactions`, a rosca mostraria um valor menor que a barra de orçamento da mesma categoria, e as duas telas se contradiriam na mesma página.
+
+**Ícones de categoria.** `src/lib/category-visuals.ts` mapeia o `icon` que a categoria já guarda no banco para um ícone Lucide mais um par de cores. As cores vivem no app, não na coluna `color`: o seed foi gravado com a paleta antiga e o remoto só é atualizado pelo dono, manualmente, então derivar no app mantém tudo em sincronia sem exigir migration de dados. Tem fallback por nome e fallback final, para categoria criada pelo usuário nunca quebrar a tela. Aplicado em orçamentos e nos limites de /hoje.
+
+**Migration 10 (`20260908100010_category_accents.sql`)**: ao revisar as telas de categoria, notado que o seed da migration 2 gravou os nomes de catálogo sem acento ("Salario", "Saude", "Educacao", "Presentes e doacoes", "Caixa Economica Federal", "Itau"), aparecendo assim na interface. Migration nova, idempotente, corrige só as linhas de catálogo (`user_id is null`); categoria criada pelo usuário não é tocada. **Não validada contra Postgres local nesta sessão** (Docker Desktop não estava disponível na máquina); são somente `update` condicionais sobre nomes exatos, sem mudança de schema, então o risco é baixo, mas revisar antes de aplicar no remoto.
+
+**Bug encontrado no teste com dados reais.** O gráfico de entrou/saiu mostrava só a barra vermelha e uma barra "Sobrou R$ 0,00" quando a renda era uma recorrência ainda não efetivada. Lia como prejuízo, não como "ainda não entrou". Corrigido: a barra "Sobrou" só aparece quando já houve receita no mês, e no lugar entra uma linha explicando que o previsto está em próximos compromissos.
+
+Testado ponta a ponta no navegador com dados reais: cadastro, onboarding com renda no dia 10, conta com saldo, quatro despesas em categorias diferentes e três limites (um tranquilo, um a 87%, um estourado a 116%), conferindo que as três faixas de alerta aparecem certas e que rosca e barras batem. A conta de teste foi excluída depois pelo próprio fluxo do app, e confirmei que o login dela não funciona mais. Lint, typecheck, os 20 testes e o build passam.
+
 ## Próximos passos (o que ainda falta)
 
 Todos os módulos funcionais principais das seções 13/14 do prompt mestre estão implementados e testados localmente: Hoje, Movimentações, Visão geral (Contas/Cartões/Relatórios), Planejar (Orçamentos/Metas/Recorrências/Dívidas), Importar/Exportar, Sugestões, Notificações, Ajuda, Configurações (perfil/aparência/categorias/segurança/dados). O que resta é polimento visual e conteúdo, não lógica de domínio:
@@ -101,7 +196,7 @@ Todos os módulos funcionais principais das seções 13/14 do prompt mestre est�
 
 ## Pendências externas (agrupadas)
 
-1. **Aplicar as 9 migrations no Supabase remoto** (`docs/SUPABASE-SETUP.md`) — bloqueia qualquer teste real de ponta a ponta contra produção. Até lá, o app roda contra o schema, mas "persistência real validada" só vale depois disso.
+1. **Aplicar as 10 migrations no Supabase remoto** (`docs/SUPABASE-SETUP.md`) — bloqueia qualquer teste real de ponta a ponta contra produção. Até lá, o app roda contra o schema, mas "persistência real validada" só vale depois disso.
 2. **Configurar Auth no painel remoto**: Site URL, Redirect URLs, e (antes de liberar cadastro público) SMTP próprio — o Supabase não tem esses valores hoje.
 3. **Configurar `SUPABASE_SERVICE_ROLE_KEY`** no ambiente de produção (nunca `NEXT_PUBLIC_`) — necessária só para exclusão de conta (`src/actions/account.ts`). Ver `.env.example`.
 4. **Identificação jurídica do operador** (razão social, CNPJ, endereço, contato formal) ainda não existe — `/termos` e `/privacidade` têm conteúdo real sobre o que o app faz, mas marcam essa lacuna explicitamente e não devem ser tratadas como termos finais para abertura de cadastro público.

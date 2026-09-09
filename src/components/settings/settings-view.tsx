@@ -6,6 +6,7 @@ import { Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { AVATAR_FAMILIES, avatarDataUri, getFamilySeeds, type AvatarFamilyKey } from "@/lib/avatars";
 import { Chip } from "@/components/onboarding/step-shell";
@@ -143,7 +144,7 @@ function ProfileSection({ profile }: { profile: SettingsProfile }) {
               </Chip>
             ))}
           </div>
-          <div className="grid grid-cols-8 gap-3">
+          <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
             {getFamilySeeds(avatarFamily).map((seed) => (
               <button
                 key={seed}
@@ -151,10 +152,14 @@ function ProfileSection({ profile }: { profile: SettingsProfile }) {
                 onClick={() => setAvatarSeed(seed)}
                 aria-pressed={avatarSeed === seed}
                 aria-label="Escolher este avatar"
-                className={`rounded-[var(--radius-md)] border-2 p-1 ${avatarSeed === seed ? "border-brand" : "border-transparent"}`}
+                className={`rounded-full transition-all duration-[var(--motion-fast)] ${
+                  avatarSeed === seed
+                    ? "ring-2 ring-brand ring-offset-2 ring-offset-surface"
+                    : "ring-1 ring-border hover:ring-border-strong"
+                }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={avatarDataUri(avatarFamily, seed)} alt="" width={40} height={40} />
+                <img src={avatarDataUri(avatarFamily, seed)} alt="" width={64} height={64} className="rounded-full" />
               </button>
             ))}
           </div>
@@ -248,7 +253,7 @@ function ToggleRow({ label, checked, onChange }: { label: string; checked: boole
   return (
     <label className="flex items-center justify-between rounded-[var(--radius-md)] border border-border bg-background px-4 py-3 text-sm">
       {label}
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="size-4 accent-[var(--color-brand)]" />
+      <Switch checked={checked} onCheckedChange={onChange} />
     </label>
   );
 }

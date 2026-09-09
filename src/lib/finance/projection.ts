@@ -96,6 +96,68 @@ export function findFirstNegativeDay(line: DailyBalancePoint[]): DailyBalancePoi
   return line.find((point) => point.balanceCents < 0) ?? null;
 }
 
+export interface RealizedMovement {
+  date: string; // "YYYY-MM-DD"
+  deltaCents: number; // positivo entra, negativo sai
+}
+
+export interface MonthBalancePoint extends DailyBalancePoint {
+  /** false ate hoje (ja aconteceu), true depois de hoje (projecao). */
+  projected: boolean;
+}
+
+/**
+ * Linha do saldo do mes inteiro: do primeiro dia ate hoje com o que ja
+ * aconteceu de verdade, e de hoje ate o fim do mes com o que esta previsto.
+ *
+ * `buildDailyBalanceLine` sozinha comeca em hoje e so olha compromissos
+ * futuros, entao um lancamento que a pessoa acabou de registrar sumia do
+ * grafico (ja estava embutido no saldo realizado) e a linha ficava reta.
+ * Aqui o passado e reconstruido andando de tras pra frente a partir do
+ * saldo de hoje, descontando cada movimento dia a dia.
+ */
+export function buildMonthBalanceLine(
+  realizedBalanceCents: number,
+  realizedMovements: RealizedMovement[],
+  pendingItems: PendingItem[],
+  monthStart: string,
+  today: string,
+  monthEnd: string
+): MonthBalancePoint[] {
+  const deltaByDate = new Map<string, number>();
+  for (const movement of realizedMovements) {
+    if (movement.date < monthStart || movement.date > today) continue;
+    deltaByDate.set(movement.date, (deltaByDate.get(movement.date) ?? 0) + movement.deltaCents);
+  }
+
+  // Passado: saldo no fim de cada dia, de tras pra frente a partir de hoje.
+  const pastDates = enumerateDates(monthStart, today);
+  const past: MonthBalancePoint[] = [];
+  let running = realizedBalanceCents;
+  for (let i = pastDates.length - 1; i >= 0; i--) {
+    past.unshift({ date: pastDates[i], balanceCents: running, projected: false });
+    // o saldo do dia anterior e este menos o que se moveu neste dia
+    running -= deltaByDate.get(pastDates[i]) ?? 0;
+  }
+
+  // Futuro: projecao a partir de hoje, so com itens certos.
+  const futureDates = enumerateDates(today, monthEnd).slice(1);
+  const pendingByDate = new Map<string, number>();
+  for (const item of pendingItems) {
+    if (!item.certain || item.dueDate <= today || item.dueDate > monthEnd) continue;
+    const delta = item.kind === "income" ? item.amountCents : -item.amountCents;
+    pendingByDate.set(item.dueDate, (pendingByDate.get(item.dueDate) ?? 0) + delta);
+  }
+
+  let projectedRunning = realizedBalanceCents;
+  const future: MonthBalancePoint[] = futureDates.map((date) => {
+    projectedRunning += pendingByDate.get(date) ?? 0;
+    return { date, balanceCents: projectedRunning, projected: true };
+  });
+
+  return [...past, ...future];
+}
+
 function enumerateDates(start: string, end: string): string[] {
   const dates: string[] = [];
   let current = new Date(`${start}T00:00:00Z`);

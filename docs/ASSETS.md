@@ -28,10 +28,37 @@ Licenças conferidas em dicebear.com/licenses em 2026-09-08. Todas CC0 1.0: uso 
 
 Seed de cada avatar (`profiles.avatar_seed`) é uma string curta sorteada ou escolhida a partir de uma lista curada (`CURATED_SEEDS` em `src/lib/avatars.ts`) — nunca derivada de email, CPF ou nome completo do usuário.
 
+## Ilustrações de personagens (landing, autenticação, 404)
+
+`src/components/marketing/illustrations.tsx`: quatro personagens em vetor plano, desenhados aqui como SVG próprio (sem base em ilustração de terceiros, sem biblioteca externa, sem licença a cumprir). Estilo: formas cheias sem contorno, rosto sem traços faciais, paleta da marca mais tons de pele.
+
+| Componente | Onde aparece |
+|---|---|
+| `PersonPointing` | Herói da landing, apontando para o celular |
+| `PersonWithPhone` | Painel lateral de entrar/cadastrar |
+| `PersonCelebrating` | Chamada final da landing |
+| `PersonSearching` | Página 404 |
+
+Dois tons de pele diferentes entre os personagens, de propósito, para não representar um público único.
+
 ## Mascote (Tiva)
 
-**Parcial.** `src/components/mascot/tiva.tsx` tem o estado "boas-vindas" (`TivaWelcome`), um SVG original em formas simples (nunca baseado em personagem existente), usado no último passo do onboarding, condicionado a `mascotEnabled`. Os estados "dica", "comemoração" e "pausa" mencionados no PROMPT MESTRE ainda não existem — pendente para uma passada futura de design visual.
+**Parcial.** `src/components/mascot/tiva.tsx` tem os estados "boas-vindas" (`TivaWelcome`, último passo do onboarding, condicionado a `mascotEnabled`) e "pausa" (`TivaPause`, deitada e tranquila). Ambos SVG originais em formas simples, nunca baseados em personagem existente. Os estados "dica" e "comemoração" mencionados no PROMPT MESTRE ainda não existem.
 
-## Fotos de estilo de vida (landing, onboarding, capas de meta)
+A mascote vive só dentro do produto. As telas públicas (landing, entrar, cadastrar, 404) usam as ilustrações de pessoas acima: uma capivara não comunica "esta é a sua rotina financeira" tão bem quanto uma pessoa usando o app, e o dono pediu explicitamente personagens humanos nessas telas.
 
-**Pendente.** Nenhuma foto foi buscada ou baixada ainda. Quando a Fase H começar, cada foto usada será registrada aqui com: URL de origem, autor, licença e o arquivo final salvo em `public/`. Até lá, a landing e o onboarding não usam fotos — usam apenas ilustração/tipografia, para não haver imagem quebrada nem alegação falsa de "fotos incluídas".
+## Fotos (landing)
+
+Buscadas no Unsplash, com confirmação individual do domínio e da licença de cada foto **antes** de baixar. **Atenção para quem for buscar a próxima**: `images.unsplash.com` é a licença gratuita; `plus.unsplash.com` é a camada paga Unsplash+, e resultados marcados "Getty Images (Premium)" na busca também são pagos. Duas candidatas já foram descartadas por isso ao longo do projeto.
+
+| Arquivo em `public/images/` | Origem | Autor | Licença |
+|---|---|---|---|
+| `portrait-user.jpg` | https://unsplash.com/photos/Op66j3yM28M | HamZa NOUASRIA (@hamza01nsr) | Unsplash License (uso comercial livre, sem exigência de atribuição) |
+
+Usada na seção "Conheça a plataforma", recortada em círculo, com cartões do produto sobrepostos. Essa pessoa não é cliente da Setiva: é foto de banco de imagens, usada conforme a licença permite. Não usar em contexto que sugira depoimento, número de clientes ou identidade real associada ao produto.
+
+Fotos removidas ao longo das revisões de design, todas por não dizerem nada sobre o produto (cena genérica de café/notebook em vez de uma pessoa ou da própria tela): `hero-planning.jpg`, `feature-hands-coffee.jpg`, `feature-phone-outdoors.jpg`. Os espaços que elas ocupavam viraram peças da própria interface (abaixo) ou ilustrações de personagem.
+
+## Mockups de interface (landing)
+
+`src/components/marketing/product-mockup.tsx` recria trechos reais de tela do produto em HTML/CSS puro: o resumo do dia em celular (`PhoneMockup`), a agenda do mês (`AgendaMockup`, a tela que dá nome ao "mapa do mês"), a fatura do cartão (`CardsMockup`) e os orçamentos por categoria (`BudgetMockup`). Não são capturas de tela nem imagens, então não têm questão de licenciamento. Usam a paleta de marca com valores fixos, independentes do tema claro/escuro do visitante, de propósito: assim aparecem sempre como o app aparece no tema padrão, do mesmo jeito que uma captura de tela apareceria. Os números exibidos são exemplos ilustrativos, não dados de um cliente real.

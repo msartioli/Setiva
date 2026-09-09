@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { AlertTriangle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
 import { parseCSV } from "@/lib/csv";
 import { parseImportDate } from "@/lib/import-date";
@@ -163,8 +164,8 @@ export function ImportWizard({ accounts }: { accounts: AccountOption[] }) {
           <p className="text-sm text-foreground-muted">
             Arquivo <strong>{fileName}</strong>, {rawRows.length} linha(s) encontradas.
           </p>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={hasHeader} onChange={(e) => setHasHeader(e.target.checked)} className="size-4 accent-[var(--color-brand)]" />
+          <label className="flex items-center gap-2.5 text-sm">
+            <Checkbox checked={hasHeader} onCheckedChange={(v) => setHasHeader(v === true)} />
             A primeira linha é um cabeçalho
           </label>
 
@@ -214,7 +215,7 @@ export function ImportWizard({ accounts }: { accounts: AccountOption[] }) {
             {duplicateCount > 0 && (
               <span className="flex items-center gap-1 text-warning">
                 <AlertTriangle className="size-4" aria-hidden="true" />
-                {duplicateCount} possível(is) duplicata(s) — revise antes de confirmar
+                {duplicateCount} possível(is) duplicata(s), revise antes de confirmar
               </span>
             )}
             {unrecognizedCount > 0 && (
@@ -237,7 +238,7 @@ export function ImportWizard({ accounts }: { accounts: AccountOption[] }) {
                 {parsedRows.map((row, i) => (
                   <tr key={i} className="border-b border-border last:border-0">
                     <td className="px-3 py-2">
-                      <input type="checkbox" checked={row.include} onChange={() => toggleRow(i)} className="size-4 accent-[var(--color-brand)]" />
+                      <Checkbox checked={row.include} onCheckedChange={() => toggleRow(i)} />
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 tabular-figures">{row.competenceDate.split("-").reverse().join("/")}</td>
                     <td className="px-3 py-2 text-foreground">{row.description}</td>

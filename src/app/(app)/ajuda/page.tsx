@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Ajuda" };
 const TOPICS: { title: string; body: string; href: string; linkLabel: string }[] = [
   {
     title: "Cadastrar sua primeira conta",
-    body: "Uma conta representa onde seu dinheiro fica de verdade: banco, carteira ou investimento. Informe o saldo atual e a data desse saldo — lançamentos anteriores a essa data não entram na conta.",
+    body: "Uma conta representa onde seu dinheiro fica de verdade: banco, carteira ou investimento. Informe o saldo atual e a data desse saldo. Lançamentos anteriores a essa data não entram na conta.",
     href: "/visao-geral",
     linkLabel: "Ir para Visão geral",
   },
@@ -24,13 +24,13 @@ const TOPICS: { title: string; body: string; href: string; linkLabel: string }[]
   },
   {
     title: "Entender a fatura e o pagamento",
-    body: "Comprar no cartão não tira dinheiro da sua conta na hora — isso conta como despesa por competência. Só quando você paga a fatura o dinheiro sai de verdade (saída de caixa). Por isso o pagamento nunca aparece como despesa duplicada.",
+    body: "Comprar no cartão não tira dinheiro da sua conta na hora: isso conta como despesa por competência. Só quando você paga a fatura o dinheiro sai de verdade (saída de caixa). Por isso o pagamento nunca aparece como despesa duplicada.",
     href: "/relatorios",
     linkLabel: "Ver caixa x competência",
   },
   {
     title: "Transferir entre suas contas",
-    body: "Uma transferência move dinheiro entre duas contas suas. Ela não é receita nem despesa — o total do seu patrimônio não muda. Use a aba Transferência dentro de Novo lançamento.",
+    body: "Uma transferência move dinheiro entre duas contas suas. Ela não é receita nem despesa: o total do seu patrimônio não muda. Use a aba Transferência dentro de Novo lançamento.",
     href: "/movimentacoes",
     linkLabel: "Ver movimentações",
   },

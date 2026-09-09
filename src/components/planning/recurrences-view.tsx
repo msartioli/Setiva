@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 import { formatCentsBRL, parseBRLToCents } from "@/lib/finance/money";
 import { archiveRecurrence, createRecurrence, effectuateOccurrence, skipOccurrence } from "@/actions/planning";
 
@@ -264,8 +265,8 @@ function NewRecurrenceForm({
         </Field>
       </div>
       {kind === "income" && (
-        <label className="flex items-center gap-2 text-sm text-foreground-muted">
-          <input type="checkbox" name="isEstimate" className="size-4 accent-[var(--color-brand)]" />
+        <label className="flex items-center gap-2.5 text-sm text-foreground-muted">
+          <Checkbox name="isEstimate" />
           Valor variável / estimado
         </label>
       )}

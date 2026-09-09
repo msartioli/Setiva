@@ -8,7 +8,7 @@ export default function PrivacidadePage() {
   return (
     <PublicPage title="Política de privacidade" updatedAt={`versão ${PRIVACY_VERSION}, 08/09/2026`}>
       <p>
-        Esta política descreve, de forma concreta, quais dados a Setiva coleta e o que faz com eles — sem
+        Esta política descreve, de forma concreta, quais dados a Setiva coleta e o que faz com eles, sem
         linguagem genérica de modelo pronto.
       </p>
 

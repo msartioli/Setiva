@@ -29,6 +29,7 @@ Aplique um arquivo inteiro por vez, na SQL Editor, exatamente nesta ordem. Cada 
 7. `20260908100007_onboarding_notifications_help.sql` — estado do onboarding, notificações e preferências.
 8. `20260908100008_imports_audit_consents.sql` — importação de CSV, auditoria mínima e consentimentos.
 9. `20260908100009_storage_indexes_views.sql` — buckets de Storage, políticas e views de apoio.
+10. `20260908100010_category_accents.sql` — corrige acentuação dos nomes de catálogo (categorias e instituições) que a migration 2 gravou sem acento.
 
 ### Aplicação em projeto vazio
 

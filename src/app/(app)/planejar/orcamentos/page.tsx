@@ -13,23 +13,27 @@ export default async function OrcamentosPage() {
   if (!user) return null;
 
   const [{ data: progress }, { data: categories }] = await Promise.all([
-    supabase.from("budget_progress").select("*, categories(name)"),
+    supabase.from("budget_progress").select("*, categories(name, icon)"),
     supabase
       .from("categories")
-      .select("id, name")
+      .select("id, name, icon")
       .or(`user_id.eq.${user.id},user_id.is.null`)
       .eq("kind", "expense")
       .is("archived_at", null)
       .order("name"),
   ]);
 
-  const budgetRows: BudgetRow[] = (progress ?? []).map((p) => ({
-    id: p.budget_id as string,
-    categoryId: p.category_id as string,
-    categoryName: (p.categories as unknown as { name: string } | null)?.name ?? "",
-    limitCents: p.limit_cents ?? 0,
-    spentCents: p.spent_cents ?? 0,
-  }));
+  const budgetRows: BudgetRow[] = (progress ?? []).map((p) => {
+    const category = p.categories as unknown as { name: string; icon: string | null } | null;
+    return {
+      id: p.budget_id as string,
+      categoryId: p.category_id as string,
+      categoryName: category?.name ?? "",
+      categoryIcon: category?.icon ?? null,
+      limitCents: p.limit_cents ?? 0,
+      spentCents: p.spent_cents ?? 0,
+    };
+  });
 
   return (
     <div>

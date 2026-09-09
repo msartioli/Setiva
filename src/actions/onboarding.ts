@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/types";
+import { setThemeCookie } from "@/lib/theme-cookie";
 import {
   accountsStepSchema,
   budgetsStepSchema,
@@ -340,6 +341,7 @@ export async function savePreferencesStep(input: PreferencesStepInput): Promise<
       })
       .eq("user_id", userId);
     if (error) throw error;
+    await setThemeCookie(parsed.data.theme);
     await advanceStep(supabase, userId, 11);
     revalidatePath("/onboarding");
     return { success: true };

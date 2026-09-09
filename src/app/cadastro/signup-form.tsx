@@ -7,6 +7,7 @@ import { signUpAction, type ActionResult } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const initialState: ActionResult = {};
 
@@ -65,12 +66,7 @@ export function SignUpForm() {
       </Field>
 
       <label className="flex items-start gap-2.5 text-sm text-foreground-muted">
-        <input
-          type="checkbox"
-          name="acceptedTerms"
-          required
-          className="mt-0.5 size-4 rounded border-border-strong accent-[var(--color-brand)]"
-        />
+        <Checkbox name="acceptedTerms" required className="mt-0.5" />
         <span>
           Li e aceito os{" "}
           <Link href="/termos" className="text-brand underline underline-offset-2">

@@ -17,13 +17,13 @@ export default function CreditosPage() {
       <h2>Avatares</h2>
       <p>
         Gerados localmente com DiceBear (
-        <span className="tabular-figures">@dicebear/core</span>), estilos Notionists, Shapes e Thumbs — todos
+        <span className="tabular-figures">@dicebear/core</span>), estilos Notionists, Shapes e Thumbs, todos
         licenciados sob CC0 1.0 (uso livre, sem exigência de atribuição). Detalhes em{" "}
         <code>docs/ASSETS.md</code>.
       </p>
 
       <h2>Tipografia</h2>
-      <p>Fraunces (títulos) e Inter (interface e tabelas), via Google Fonts.</p>
+      <p>Bricolage Grotesque (títulos) e Inter (interface e tabelas), via Google Fonts.</p>
 
       <h2>Marca</h2>
       <p>Logo, símbolo e ícones do aplicativo são material próprio do operador da Setiva.</p>

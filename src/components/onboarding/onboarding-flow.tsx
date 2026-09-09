@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { StepShell, Chip } from "./step-shell";
 import { TivaWelcome } from "@/components/mascot/tiva";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
   AVATAR_FAMILIES,
   NICKNAME_SUGGESTIONS,
@@ -87,10 +89,11 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
 
   // Passo 3
   const [incomeSources, setIncomeSources] = useState<
-    { description: string; amountCents: number; isEstimate: boolean }[]
+    { description: string; amountCents: number; isEstimate: boolean; anchorDay: number }[]
   >([]);
   const [incomeDesc, setIncomeDesc] = useState("");
   const [incomeAmount, setIncomeAmount] = useState("");
+  const [incomeDay, setIncomeDay] = useState("5");
   const [incomeEstimate, setIncomeEstimate] = useState(false);
 
   // Passo 4
@@ -232,12 +235,14 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                     onClick={() => setAvatarSeed(seed)}
                     aria-pressed={avatarSeed === seed}
                     aria-label="Escolher este avatar"
-                    className={`rounded-[var(--radius-md)] border-2 p-1 transition-colors ${
-                      avatarSeed === seed ? "border-brand" : "border-transparent hover:border-border-strong"
+                    className={`rounded-full transition-all duration-[var(--motion-fast)] ${
+                      avatarSeed === seed
+                        ? "ring-2 ring-brand ring-offset-2 ring-offset-background"
+                        : "ring-1 ring-border hover:ring-border-strong"
                     }`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={avatarDataUri(avatarFamily, seed)} alt="" width={48} height={48} />
+                    <img src={avatarDataUri(avatarFamily, seed)} alt="" width={64} height={64} className="rounded-full" />
                   </button>
                 ))}
               </div>
@@ -283,7 +288,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
         <StepShell
           step={3}
           title="Como entra seu dinheiro?"
-          subtitle="Adicione cada fonte de renda mensal. Se o valor variar, marque como estimado."
+          subtitle="Adicione cada fonte de renda mensal e o dia em que ela cai. É esse dia que posiciona a entrada no mapa do mês. Se o valor variar, marque como estimado."
           onBack={() => back(2)}
           onSkip={() => run(() => saveIncomeStep({ sources: [] }), next)}
           skipLabel="Ainda não sei"
@@ -297,7 +302,6 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
                       sources: incomeSources.map((s) => ({
                         ...s,
                         frequency: "monthly",
-                        anchorDay: 5,
                       })),
                     }),
                   next
@@ -313,32 +317,42 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             onRemove={(i) => setIncomeSources((prev) => prev.filter((_, idx) => idx !== i))}
             render={(item) => (
               <span>
-                {item.description} — {formatCentsBRL(item.amountCents)}
+                {item.description}: {formatCentsBRL(item.amountCents)}, todo dia {item.anchorDay}
                 {item.isEstimate ? " (estimado)" : ""}
               </span>
             )}
           />
           <div className="mt-4 flex flex-col gap-3 rounded-[var(--radius-lg)] border border-border bg-surface p-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]">
               <Input
                 placeholder="Ex: Salário"
+                aria-label="Descrição da renda"
                 value={incomeDesc}
                 onChange={(e) => setIncomeDesc(e.target.value)}
               />
               <Input
                 placeholder="R$ 0,00"
                 inputMode="decimal"
+                aria-label="Valor da renda"
                 value={incomeAmount}
                 onChange={(e) => setIncomeAmount(e.target.value)}
               />
+              <label className="flex items-center gap-2 text-sm text-foreground-muted">
+                <span className="whitespace-nowrap">Todo dia</span>
+                <Input
+                  type="number"
+                  min={1}
+                  max={31}
+                  inputMode="numeric"
+                  aria-label="Dia do mês em que a renda entra"
+                  className="w-20"
+                  value={incomeDay}
+                  onChange={(e) => setIncomeDay(e.target.value)}
+                />
+              </label>
             </div>
-            <label className="flex items-center gap-2 text-sm text-foreground-muted">
-              <input
-                type="checkbox"
-                checked={incomeEstimate}
-                onChange={(e) => setIncomeEstimate(e.target.checked)}
-                className="size-4 rounded border-border-strong accent-[var(--color-brand)]"
-              />
+            <label className="flex items-center gap-2.5 text-sm text-foreground-muted">
+              <Checkbox checked={incomeEstimate} onCheckedChange={(v) => setIncomeEstimate(v === true)} />
               Valor variável / estimado
             </label>
             <Button
@@ -346,12 +360,21 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
               variant="secondary"
               onClick={() => {
                 if (!incomeDesc.trim() || !incomeAmount.trim()) return;
+                const day = Number(incomeDay);
+                if (!Number.isInteger(day) || day < 1 || day > 31) {
+                  setError("O dia da renda precisa ser um número de 1 a 31.");
+                  return;
+                }
                 try {
                   const cents = parseBRLToCents(incomeAmount);
                   if (cents <= 0) return;
-                  setIncomeSources((prev) => [...prev, { description: incomeDesc, amountCents: cents, isEstimate: incomeEstimate }]);
+                  setIncomeSources((prev) => [
+                    ...prev,
+                    { description: incomeDesc, amountCents: cents, isEstimate: incomeEstimate, anchorDay: day },
+                  ]);
                   setIncomeDesc("");
                   setIncomeAmount("");
+                  setIncomeDay("5");
                   setIncomeEstimate(false);
                 } catch {
                   setError("Valor de renda inválido.");
@@ -396,7 +419,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             onRemove={(i) => setAccounts((prev) => prev.filter((_, idx) => idx !== i))}
             render={(item) => (
               <span>
-                {item.name} — {formatCentsBRL(item.initialBalanceCents)}
+                {item.name}: {formatCentsBRL(item.initialBalanceCents)}
               </span>
             )}
           />
@@ -446,7 +469,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
         <StepShell
           step={5}
           title="Usa cartão de crédito?"
-          subtitle="Sem número completo, CVV ou senha — só o que ajuda a calcular a fatura."
+          subtitle="Sem número completo, CVV ou senha. Só o que ajuda a calcular a fatura."
           onBack={() => back(4)}
           onSkip={() => run(() => saveCardsStep({ cards: [] }), next)}
           footer={
@@ -463,7 +486,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             onRemove={(i) => setCards((prev) => prev.filter((_, idx) => idx !== i))}
             render={(item) => (
               <span>
-                {item.name} — limite {formatCentsBRL(item.limitCents)}, fecha dia {item.closingDay}, vence dia{" "}
+                {item.name}: limite {formatCentsBRL(item.limitCents)}, fecha dia {item.closingDay}, vence dia{" "}
                 {item.dueDay}
               </span>
             )}
@@ -519,7 +542,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
         <StepShell
           step={6}
           title="Quais contas fazem parte do seu mês?"
-          subtitle="Aluguel, internet, transporte — o que se repete todo mês. Os valores não são cadastrados automaticamente."
+          subtitle="Aluguel, internet, transporte: o que se repete todo mês. Os valores não são cadastrados automaticamente."
           onBack={() => back(5)}
           onSkip={() => run(() => saveMonthlyBillsStep({ bills: [] }), next)}
           footer={
@@ -540,7 +563,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             onRemove={(i) => setBills((prev) => prev.filter((_, idx) => idx !== i))}
             render={(item) => (
               <span>
-                {item.description} — {formatCentsBRL(item.amountCents)}, todo dia {item.anchorDay}
+                {item.description}: {formatCentsBRL(item.amountCents)}, todo dia {item.anchorDay}
               </span>
             )}
           />
@@ -571,7 +594,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
         <StepShell
           step={7}
           title="Há parcelas ou dívidas em andamento?"
-          subtitle="Fora do cartão — empréstimo, financiamento, acordo. Pode pular se não tiver."
+          subtitle="Fora do cartão: empréstimo, financiamento, acordo. Pode pular se não tiver."
           onBack={() => back(6)}
           onSkip={() => run(() => saveDebtsStep({ debts: [] }), next)}
           footer={
@@ -585,7 +608,7 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             onRemove={(i) => setDebts((prev) => prev.filter((_, idx) => idx !== i))}
             render={(item) => (
               <span>
-                {item.name} — saldo {formatCentsBRL(item.currentBalanceCents)}
+                {item.name}: saldo {formatCentsBRL(item.currentBalanceCents)}
               </span>
             )}
           />
@@ -704,13 +727,8 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             </Button>
           }
         >
-          <label className="mb-4 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={wantsGoal}
-              onChange={(e) => setWantsGoal(e.target.checked)}
-              className="size-4 rounded border-border-strong accent-[var(--color-brand)]"
-            />
+          <label className="mb-4 flex items-center gap-2.5 text-sm">
+            <Checkbox checked={wantsGoal} onCheckedChange={(v) => setWantsGoal(v === true)} />
             Quero definir uma meta agora
           </label>
           {wantsGoal && (
@@ -783,15 +801,15 @@ export function OnboardingFlow(props: OnboardingFlowProps) {
             </div>
             <label className="flex items-center justify-between rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm">
               Ocultar valores por padrão
-              <input type="checkbox" checked={hideValues} onChange={(e) => setHideValues(e.target.checked)} className="size-4 accent-[var(--color-brand)]" />
+              <Switch checked={hideValues} onCheckedChange={setHideValues} />
             </label>
             <label className="flex items-center justify-between rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm">
               Animações
-              <input type="checkbox" checked={animationsEnabled} onChange={(e) => setAnimationsEnabled(e.target.checked)} className="size-4 accent-[var(--color-brand)]" />
+              <Switch checked={animationsEnabled} onCheckedChange={setAnimationsEnabled} />
             </label>
             <label className="flex items-center justify-between rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm">
               Mostrar a Tiva (mascote)
-              <input type="checkbox" checked={mascotEnabled} onChange={(e) => setMascotEnabled(e.target.checked)} className="size-4 accent-[var(--color-brand)]" />
+              <Switch checked={mascotEnabled} onCheckedChange={setMascotEnabled} />
             </label>
           </div>
         </StepShell>
@@ -950,7 +968,7 @@ function ReviewSummary({
       {overCommitted && (
         <p className="rounded-[var(--radius-md)] bg-warning-soft px-3.5 py-2.5 text-sm text-warning">
           Suas contas do mês ({formatCentsBRL(totalBills)}) somam mais do que a renda que você declarou (
-          {formatCentsBRL(totalIncome)}). Não tem problema cadastrar assim — é só algo para olhar de perto no
+          {formatCentsBRL(totalIncome)}). Não tem problema cadastrar assim, é só algo para olhar de perto no
           seu mapa do mês.
         </p>
       )}

@@ -11,7 +11,7 @@ export default function CadastroPage() {
     <AuthShell
       eyebrow="Comece agora"
       title="Crie sua conta na Setiva"
-      subtitle="Sem cartão de crédito, sem promessa de plano gratuito para sempre — só o cadastro para organizar o seu mês."
+      subtitle="Sem cartão de crédito, sem promessa de plano gratuito para sempre. Só o cadastro para organizar o seu mês."
     >
       <SignUpForm />
     </AuthShell>

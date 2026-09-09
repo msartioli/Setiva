@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { recordSignupConsents } from "@/lib/legal";
+import { setThemeCookie } from "@/lib/theme-cookie";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -78,10 +79,21 @@ export async function logInAction(_prev: ActionResult, formData: FormData): Prom
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     return { error: traduzErroAuth(error.message) };
+  }
+
+  if (data.user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("theme")
+      .eq("user_id", data.user.id)
+      .maybeSingle();
+    if (profile?.theme) {
+      await setThemeCookie(profile.theme);
+    }
   }
 
   const proximo = formData.get("proximo");

@@ -39,15 +39,15 @@ export function AppShell({
   return (
     <div className="flex min-h-svh flex-col bg-background">
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/hoje" className="flex items-center gap-2">
+        <div className="mx-auto grid h-16 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 sm:px-6">
+          <Link href="/hoje" className="flex items-center gap-2 justify-self-start">
             <Image src="/brand/symbol.png" alt="" width={26} height={26} />
             <span className="hidden font-display text-lg text-foreground sm:inline">Setiva</span>
           </Link>
 
           <nav
             aria-label="Navegação principal"
-            className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-[var(--radius-pill)] border border-border bg-surface p-1 shadow-sm md:flex"
+            className="hidden min-w-0 items-center justify-self-center gap-1 rounded-[var(--radius-pill)] border border-border bg-surface p-1 shadow-sm md:flex"
           >
             {NAV_ITEMS.map((item) => {
               const active = pathname.startsWith(item.href);
@@ -57,30 +57,30 @@ export function AppShell({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-2 rounded-[var(--radius-pill)] px-4 py-2 text-sm font-medium transition-colors duration-[var(--motion-fast)]",
+                    "flex items-center gap-2 whitespace-nowrap rounded-[var(--radius-pill)] px-3 py-2 text-sm font-medium transition-colors duration-[var(--motion-fast)] lg:px-4",
                     active ? "bg-brand text-brand-foreground" : "text-foreground-muted hover:text-foreground"
                   )}
                 >
-                  <item.icon className="size-4" aria-hidden="true" />
-                  {item.label}
+                  <item.icon className="size-4 shrink-0" aria-hidden="true" />
+                  <span className="hidden lg:inline">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-self-end gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={onNewTransaction}
-              className="hidden items-center gap-1.5 rounded-[var(--radius-pill)] bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-strong sm:inline-flex"
+              className="hidden items-center gap-1.5 whitespace-nowrap rounded-[var(--radius-pill)] bg-accent px-3 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent-strong sm:inline-flex lg:px-4"
             >
-              <Plus className="size-4" aria-hidden="true" />
-              Novo lançamento
+              <Plus className="size-4 shrink-0" aria-hidden="true" />
+              <span className="hidden lg:inline">Novo lançamento</span>
             </button>
             <Link
               href="/notificacoes"
               aria-label={unreadNotifications > 0 ? `Notificações, ${unreadNotifications} não lidas` : "Notificações"}
-              className="relative flex size-11 items-center justify-center rounded-[var(--radius-pill)] text-foreground-muted hover:bg-surface hover:text-foreground"
+              className="relative flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-pill)] text-foreground-muted hover:bg-surface hover:text-foreground"
             >
               <Bell className="size-5" aria-hidden="true" />
               {unreadNotifications > 0 && (

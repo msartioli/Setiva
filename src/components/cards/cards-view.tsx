@@ -119,7 +119,7 @@ export function CardsView({
       <Dialog open={Boolean(purchaseCard)} onOpenChange={(open) => !open && setPurchaseCard(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nova compra {purchaseCard ? `— ${purchaseCard.name}` : ""}</DialogTitle>
+            <DialogTitle>Nova compra {purchaseCard ? `no ${purchaseCard.name}` : ""}</DialogTitle>
           </DialogHeader>
           {purchaseCard && (
             <NewPurchaseForm cardId={purchaseCard.id} categories={categories} onDone={() => setPurchaseCard(null)} />

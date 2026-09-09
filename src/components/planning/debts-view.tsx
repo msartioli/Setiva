@@ -79,7 +79,7 @@ export function DebtsView({ debts, accounts }: { debts: DebtRow[]; accounts: Acc
       <Dialog open={Boolean(payingDebt)} onOpenChange={(open) => !open && setPayingDebt(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Pagamento — {payingDebt?.name}</DialogTitle>
+            <DialogTitle>Pagamento de {payingDebt?.name}</DialogTitle>
           </DialogHeader>
           {payingDebt && <PaymentForm debt={payingDebt} accounts={accounts} onDone={() => setPayingDebt(null)} />}
         </DialogContent>
